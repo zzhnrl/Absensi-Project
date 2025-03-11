@@ -1,0 +1,45 @@
+html { font-family:Calibri, Arial, Helvetica, sans-serif; font-size:11pt; background-color:white }
+a.comment-indicator:hover + div.comment { background:#ffd; position:absolute; display:block; border:1px solid black; padding:0.5em }
+a.comment-indicator { background:red; display:inline-block; border:1px solid black; width:0.5em; height:0.5em }
+div.comment { display:none }
+table { border:1px solid black !important; page-break-after:always }
+.b { text-align:center }
+.e { text-align:center }
+.f { text-align:center }
+.inlineStr { text-align:center }
+.n { text-align:center }
+.s { text-align:center }
+td{
+  word-wrap:break-word
+}
+.style8 {
+max-width: 150px !important;
+}
+
+table.sheet0 col.col0 { width:23.04444418pt }
+table.sheet0 col.col1 { width:135.555554pt }
+table.sheet0 col.col2 { width:67.09999923pt }
+table.sheet0 col.col3 { width:70.48888808pt }
+table.sheet0 col.col4 { width:38.63333289pt }
+table.sheet0 col.col5 { width:39.98888843pt }
+table.sheet0 col.col6 { width:42pt }
+table.sheet0 col.col7 { width:42pt }
+table.sheet0 col.col8 { width:66.42222146pt }
+table.sheet0 col.col9 { width:70.48888808pt }
+table.sheet0 col.col10 { width:38.63333289pt }
+table.sheet0 col.col11 { width:39.98888843pt }
+table.sheet0 col.col12 { width:42pt }
+table.sheet0 col.col13 { width:39.98888843pt }
+table.sheet0 col.col14 { width:86.07777679pt }
+table.sheet0 col.col15 { width:116.57777644pt }
+table.sheet0 tr { height:15pt }
+table.sheet0 tr.row0 { height:66pt }
+table.sheet0 tr.row1 { height:30.75pt }
+
+th:first-child, td:first-child
+{
+  position:sticky;
+  left:0px;
+  background-color:yellow;
+  color:black;
+}

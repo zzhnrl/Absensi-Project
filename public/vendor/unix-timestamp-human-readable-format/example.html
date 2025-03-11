@@ -1,0 +1,127 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Time To Readable Example</title>
+<link href="https://www.cssscript.com/demo/sticky.css" rel="stylesheet" type="text/css">
+<style>
+body {
+	background: #000;
+	color: #fff;
+	font-family: 'Inter';
+	line-height: 140%;
+}
+.chat-body {
+	width: 90%;
+	max-width: 560px;
+	margin: 150px auto;
+}
+.chat {
+	clear: both;
+	float: left;
+	max-width: 90%;
+}
+.chat-self {
+	float: right;
+}
+.chat + .chat {
+	margin-top: 20px;
+}
+.chat-meta {
+	font-size: 75%;
+	padding: 0 10px;
+}
+.chat-self .chat-meta {
+	text-align: right;
+}
+.chat-content {
+	background: #222;
+	padding: 2px 20px;
+	border-radius: 8px;
+}
+</style>
+</head>
+<body>
+<div id="css-script-menu">
+  <div class="css-script-center">
+    <ul>
+      <li><a href="https://www.cssscript.com/unix-timestamp-human-readable-format/">Download</a></li>
+      <li><a href="https://www.cssscript.com/">Back To CSS Script</a></li>
+    </ul>
+    <div class="css-script-ads"><div id="carbon-block"></div>
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- CSSScript Demo Page -->
+<ins class="adsbygoogle"
+     style="display:inline-block;width:728px;height:90px"
+     data-ad-client="ca-pub-2783044520727903"
+     data-ad-slot="3025259193"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></div>
+    <div class="css-script-clear"></div>
+  </div>
+</div>
+<div class="chat-body">
+	<h1>Time To Readable Example</h1>
+	<p>A tiny and multilingual time ago JavaScript library that converts the content of an element with the "data-ago" attribute (value = UNIX milliseconds), into human-readable format such as xx days ago.<a tiny and multilingual time ago JavaScript library that converts the content of an element with the "data-ago" attribute (value = UNIX milliseconds), into human-readable format such as xx days ago./p>
+	<div class="chat chat-self">
+		<div class="chat-meta"><span data-ago="1639729501000">2021/12/17 15:25</span></div>
+		<div class="chat-content"><p>Alright, I'll send the materials after this.</p></div>
+	</div>
+	<div class="chat chat-other">
+		<div class="chat-meta"><span data-ago="1639729735000">2021/12/17 15:28</span></div>
+		<div class="chat-content"><p>Ok, thanks a lot.</p></div>
+	</div>
+	<div class="chat chat-other">
+		<div class="chat-meta"><span data-ago="1639751901000">2021/12/17 21:38</span></div>
+		<div class="chat-content"><p>OI!</p></div>
+	</div>
+	<div class="chat chat-other">
+		<div class="chat-meta"><span data-ago="1639751912000">2021/12/17 21:38</span></div>
+		<div class="chat-content"><p>WHY THE HECK DID YOU SEND ME YOUR HOMEWORK FOLDER?!?!?</p><p>THE WHOLE CLASSROOM IS NOW LOOKING AT ME LIKE A PIECE OF GARBAGE BECAUSE OF YOU!!!!</p></div>
+	</div>
+	<div class="chat chat-self">
+		<div class="chat-meta"><span data-ago="1639751986000">2021/12/17 21:39</span></div>
+		<div class="chat-content"><p>What are you talking about? You make it sounds as if you usually gets different reaction in class.</p></div>
+	</div>
+	<div class="chat chat-self">
+		<div class="chat-meta"><span data-ago="1639752948000">2021/12/17 21:55</span></div>
+		<div class="chat-content"><p>...</p></div>
+	</div>
+	<div class="chat chat-self">
+		<div class="chat-meta"><span data-ago="1639753001000">2021/12/17 21:56</span></div>
+		<div class="chat-content"><p>In case you haven't realized, the time format right above this text is modified by Javascript.</p></div>
+	</div>
+</div>
+
+<script>
+/** Convert content of element with "data-ago" attribute (value = UNIX milliseconds), into readable format. */
+function timeDifference(target,current=new Date()){var msPerMinute=60*1000;var msPerHour=msPerMinute*60;var msPerDay=msPerHour*24;var msPerMonth=msPerDay*30;var msPerYear=msPerDay*365;var elapsed=target-current;if(elapsed>0){if(elapsed<msPerMinute){var nume=Math.round(elapsed/1000);var unit='second'}else if(elapsed<msPerHour){var nume=Math.round(elapsed/msPerMinute);var unit='minute'}else if(elapsed<msPerDay){var nume=Math.round(elapsed/msPerHour);var unit='hour'}else if(elapsed<msPerMonth){var nume=Math.round(elapsed/msPerDay);var unit='day'}else if(elapsed<msPerYear){var nume=Math.round(elapsed/msPerMonth);var unit='month'}else{var nume=Math.round(elapsed/msPerYear);var unit='year'}}else{if(elapsed>(-1*msPerMinute)){var nume=Math.round(elapsed/1000);var unit='second'}else if(elapsed>(-1*msPerHour)){var nume=Math.round(elapsed/msPerMinute);var unit='minute'}else if(elapsed>(-1*msPerDay)){var nume=Math.round(elapsed/msPerHour);var unit='hour'}else if(elapsed>(-1*msPerMonth)){var nume=Math.round(elapsed/msPerDay);var unit='day'}else if(elapsed>(-1*msPerYear)){var nume=Math.round(elapsed/msPerMonth);var unit='month'}else{var nume=Math.round(elapsed/msPerYear);var unit='year'}}const rtf=new Intl.RelativeTimeFormat();return rtf.format(nume,unit)}var elements=document.querySelectorAll('[data-ago]');elements.forEach(function(element,index){var timeAgo=timeDifference(element.getAttribute('data-ago'));element.innerHTML=timeAgo;});
+</script>
+<script>
+try {
+  fetch(new Request("https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js", { method: 'HEAD', mode: 'no-cors' })).then(function(response) {
+    return true;
+  }).catch(function(e) {
+    var carbonScript = document.createElement("script");
+    carbonScript.src = "//cdn.carbonads.com/carbon.js?serve=CE7DC2JW&placement=wwwcssscriptcom";
+    carbonScript.id = "_carbonads_js";
+    document.getElementById("carbon-block").appendChild(carbonScript);
+  });
+} catch (error) {
+  console.log(error);
+}
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-46156385-1', 'cssscript.com');
+  ga('send', 'pageview');
+
+</script>
+</body>
+</html>
