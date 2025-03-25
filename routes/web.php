@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\OfficeLocationController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -288,3 +289,10 @@ Route::group(['middleware' => ['auth']], function () {
         ],
     ]);
 });
+
+
+
+Route::get('/input-lokasi', [OfficeLocationController::class, 'inputLokasi'])->name('inputLokasi');
+Route::post('/set-office-location', [OfficeLocationController::class, 'store'])->name('setOfficeLocation');
+
+Route::get('/cek-kehadiran', [OfficeLocationController::class, 'cekKehadiran'])->name('cekKehadiran');
