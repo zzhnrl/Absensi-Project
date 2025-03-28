@@ -14,11 +14,15 @@ class PointUser extends Model
 
     public $timestamps = false;
 
-    protected $fillable = [
-        'bulan',
-        'tahun',
-        'jumlah_point'
-    ];
+protected $fillable = [
+    'uuid', // Tambahkan UUID di sini
+    'bulan',
+    'tahun',
+    'user_id',
+    'jumlah_point',
+    'nama_karyawan'
+];
+
 
     protected $hidden = [
         'id',

@@ -10,9 +10,11 @@ use App\Models\Absensi;
 use App\Models\PointUser;
 use App\Models\KategoriAbsensi;
 use App\Models\User;
+use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class AbsensiController extends Controller
 {
@@ -62,11 +64,17 @@ class AbsensiController extends Controller
                 ->where('tanggal', $hariIni) 
                 ->exists();
 
+            $office = \App\Models\OfficeLocation::first();
+                    if (!$office) {
+            return redirect()->route("absensi")->with('danger', 'Lokasi kantor belum diatur.');
+        }
+
             if (!$sudahAbsensi) {
                 return view('absensi.create', [
                     'breadcrumb' => breadcrumb($breadcrumb),
                     'users' => $users['data'],
-                    'kategori_absensis' => KategoriAbsensi::where('is_active', 1)->get()
+                    'kategori_absensis' => KategoriAbsensi::where('is_active', 1)->get(),
+                    'office' => $office
                 ]);
             } else {
                 $alert = 'danger';
@@ -83,78 +91,124 @@ class AbsensiController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
-    {
-        DB::beginTransaction();
-        try {
-            if (auth()->user()->id == 1){
-                $user = app('GetUserService')->execute([
-                    'user_uuid' => $request->user_uuid,
-                ])['data'];
+public function store(Request $request)
+{
+    DB::beginTransaction();
+    try {
+        $authUser = auth()->user();
 
-            } else {
-                $user = app('GetUserService')->execute([
-                    'user_uuid' => auth()->user()->uuid,
-                ])['data'];
-            }
+        // Log data yang dikirim
+        Log::info('Data request diterima:', $request->all());
 
-            $kategori_absensi = app('GetKategoriAbsensiService')->execute([
-                'kategori_absensi_uuid' => $request->kategori_absensi_uuid,
-            ])['data'];
+        // Cek apakah user adalah Admin (id = 1) atau user biasa
+        if ($authUser->id == 1) {
+            $user = User::where('uuid', $request->user_uuid)->firstOrFail();
+        } else {
+            $user = $authUser;
+        }
 
-            $point_user = app('GetPointUserService')->execute([
-                'point_user_uuid' => $request->point_user_uuid,
-            ])['data'];
+        Log::info('User yang akan digunakan:', [
+            'authUser_id' => $authUser->id,
+            'request_user_uuid' => $request->user_uuid ?? 'NULL',
+            'user_id' => $user->id,
+            'user_uuid' => $user->uuid,
+        ]);
 
-            $bulan = Carbon::parse($request->date)->locale('id')->translatedFormat('F');
-            $tahun = Carbon::parse($request->date)->locale('id')->translatedFormat('Y');
-            $point_user = PointUser::where('deleted_at', null)
-            ->where('nama_karyawan', $user->userInformation->nama) 
+        // Ambil kategori absensis berdasarkan UUID
+        Log::info('Mencari kategori absensis dengan UUID:', ['uuid' => $request->kategori_absensi_uuid]);
+
+        $kategori_absensis = KategoriAbsensi::where('uuid', $request->kategori_absensi_uuid)->first();
+
+        if (!$kategori_absensis) {
+            Log::warning('Kategori absensis tidak ditemukan:', ['uuid' => $request->kategori_absensi_uuid]);
+            return redirect()->back()->with('danger', 'Kategori absensis tidak ditemukan');
+        }
+
+        Log::info('Kategori absensis ditemukan:', $kategori_absensis->toArray());
+
+        // Ambil nama karyawan dari tabel user_informations berdasarkan user_id
+        $nama_karyawan = DB::table('user_informations')
+            ->where('user_id', $user->id)
+            ->value('nama') ?? 'Unknown';
+
+        Log::info('Nama karyawan yang digunakan:', ['nama_karyawan' => $nama_karyawan]);
+
+        // Konversi tanggal menjadi format bulan dan tahun dalam bahasa Indonesia
+        $bulan = Carbon::parse($request->date)->locale('id')->translatedFormat('F');
+        $tahun = Carbon::parse($request->date)->locale('id')->translatedFormat('Y');
+
+        // Cek apakah user sudah memiliki point pada bulan & tahun yang sama
+        $point_user = PointUser::whereNull('deleted_at')
+            ->where('user_id', $user->id)
             ->where('bulan', $bulan)
             ->where('tahun', $tahun)
             ->first();
 
-            if ($point_user) {
-                $point_akhir = $point_user->jumlah_point + $kategori_absensi->point;
-                app('UpdatePointUserService')->execute([
-                    'point_user_id' => $point_user->id,
-                    'jumlah_point' => $point_akhir,
-                ], true);
-
-            } else { 
-                $input_dto = [
-                    'user_uuid' => $user->uuid,
-                    'nama_karyawan' => $user->userInformation->nama,
-                    'bulan' => $bulan, 
-                    'tahun' => $tahun,
-                    'jumlah_point' => $kategori_absensi->point,
-                ];
-                app('StorePointUserService')->execute($input_dto, true);
-            }
-
-                $input_dto = [
-                    'user_uuid' => $user->uuid,
-                    'kategori_absensi_uuid' => $request->kategori_absensi_uuid,
-                    'nama_karyawan' => $user->userInformation->nama,
-                    'nama_kategori' => $kategori_absensi->name,
-                    'tanggal' => now(),
-                    'keterangan' => $request->keterangan,
-                    'jumlah_point' => $kategori_absensi->point,
-                ];
-        
-                $user = app('StoreAbsensiService')->execute($input_dto, true);
-        
-                $alert = 'success';
-                $message = 'Absensi berhasil dibuat';
-                DB::commit();
-                return redirect()->route('absensi')->with($alert, $message);
-            } catch (\Exception $ex) {
-                DB::rollback();
-                $alert = 'danger';
-                $message = $ex->getMessage();
-                return redirect()->back()->withInput()->with($alert, $message);
-            }
+        if ($point_user) {
+            // Update jumlah point jika data sudah ada
+            $point_user->update([
+                'jumlah_point' => $point_user->jumlah_point + $kategori_absensis->point
+            ]);
+            Log::info('Point user diperbarui:', $point_user->toArray());
+        } else {
+            // Buat record baru jika belum ada
+            $point_user = PointUser::create([
+                'uuid' => Str::uuid(),
+                'user_id' => $user->id,
+                'user_uuid' => $user->uuid,
+                'nama_karyawan' => $nama_karyawan,
+                'bulan' => $bulan,
+                'tahun' => $tahun,
+                'jumlah_point' => $kategori_absensis->point,
+            ]);
+            Log::info('Point user baru dibuat:', $point_user->toArray());
         }
+
+        // Menentukan jam masuk
+        $jam_masuk = now()->format('H:i');
+
+        // Menentukan status absensi berdasarkan jam masuk
+        $jamSekarang = now()->hour * 60 + now()->minute;
+        if ($jamSekarang >= 540 && $jamSekarang <= 600) {
+            $status_absen = "Hadir";
+        } elseif ($jamSekarang >= 601 && $jamSekarang <= 1020) {
+            $status_absen = "Terlambat";
+        } else {
+            $status_absen = "Alpha / Tidak Hadir";
+        }
+
+        // **Perbaikan: Pastikan semua kolom yang diperlukan tidak NULL**
+        $absensi = Absensi::create([
+            'uuid' => Str::uuid(), // ✅ **Tambahkan UUID agar tidak NULL**
+            'user_id' => $user->id,
+            'user_uuid' => $user->uuid,
+            'kategori_absensi_id' => $kategori_absensis->id,
+            'tanggal' => now()->toDateString(),
+            'nama_kategori' => $kategori_absensis->name,
+            'nama_karyawan' => $nama_karyawan,
+            'jumlah_point' => $kategori_absensis->point ?? 0,
+            'kategori_absensi_uuid' => $request->kategori_absensi_uuid,
+            'keterangan' => $request->keterangan ?? '-',
+            'jam_masuk' => $jam_masuk,
+            'status_absen' => $status_absen,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        Log::info('Absensi berhasil disimpan:', $absensi->toArray());
+
+        DB::commit();
+        return redirect()->back()->with('success', 'Absensi berhasil disimpan');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error saat menyimpan absensi:', ['error' => $e->getMessage()]);
+        return redirect()->back()->with('danger', 'Terjadi kesalahan saat menyimpan absensi');
+    }
+}
+
+
+
+
     /**
      * Show the form for editing the specified resource.
      *

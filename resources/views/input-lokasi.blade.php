@@ -38,10 +38,14 @@
                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300 focus:outline-none" required>
             </div>
 
-            <div class="mb-4">
+            <div class="mb-4 flex gap-4">
                 <button type="button" onclick="getCoordinates()"
-                        class="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-2 px-4 rounded transition">
+                        class="flex-1 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-2 px-4 rounded transition">
                     🔍 Cari Koordinat
+                </button>
+                <button type="button" onclick="resetLocation()"
+                        class="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded transition">
+                    🔄 Reset Lokasi
                 </button>
             </div>
 
@@ -68,7 +72,7 @@
     </div>
 </div>
 
-{{-- Script untuk fetch koordinat berdasarkan alamat --}}
+{{-- Script untuk mencari koordinat dan reset lokasi --}}
 <script>
     function getCoordinates() {
         const address = document.getElementById("address").value;
@@ -83,21 +87,18 @@
                     document.getElementById("latitude").value = data[0].lat;
                     document.getElementById("longitude").value = data[0].lon;
                 } else {
-                    alert("Alamat tidak ditemukan. Coba gunakan alamat yang lebih spesifik.");
+                    alert("Alamat tidak ditemukan!");
                 }
             })
-            .catch(() => alert("Terjadi kesalahan saat mencari koordinat."));
+            .catch(() => alert("Gagal mengambil koordinat, coba lagi!"));
     }
 
-    function validateForm() {
-        const lat = document.getElementById("latitude").value;
-        const lon = document.getElementById("longitude").value;
-        if (!lat || !lon) {
-            alert("Koordinat belum terisi.");
-            return false;
-        }
-        return true;
+    function resetLocation() {
+        document.getElementById("address").value = "";
+        document.getElementById("latitude").value = "";
+        document.getElementById("longitude").value = "";
     }
 </script>
+
 @endif
 @endsection

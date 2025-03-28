@@ -18,6 +18,15 @@ public function cekKehadiran()
     $office = \App\Models\OfficeLocation::first();
     return view('deteksi-lokasi', compact('office'));
 }
+    public function getOfficeLocation()
+    {
+        $office = \App\Models\OfficeLocation::first(); // Ambil lokasi kantor dari database
+
+        return response()->json([
+            'latitude' => $office->latitude,
+            'longitude' => $office->longitude
+        ]);
+    }
 
 
     public function store(Request $request)

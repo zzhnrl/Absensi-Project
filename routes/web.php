@@ -296,3 +296,5 @@ Route::get('/input-lokasi', [OfficeLocationController::class, 'inputLokasi'])->n
 Route::post('/set-office-location', [OfficeLocationController::class, 'store'])->name('setOfficeLocation');
 
 Route::get('/cek-kehadiran', [OfficeLocationController::class, 'cekKehadiran'])->name('cekKehadiran');
+
+Route::get('/get-office-location', [OfficeLocationController::class, 'getOfficeLocation']);

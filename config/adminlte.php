@@ -1,5 +1,5 @@
 <?php
-
+use Illuminate\Support\Facades\Auth;
 return [
 
     /*
@@ -301,6 +301,13 @@ return [
             'url'  => '/cuti',
             'icon' => 'fas fa-folder-minus',
             'module_key' => 'cuti_view',
+        ],
+            // Tambahkan menu Input Lokasi jika role_id adalah 1
+        [
+            'text' => 'Input Lokasi',
+            'url'  => '/input_lokasi',
+            'icon' => 'fas fa-map-marker-alt',
+            'module_key' => 'input_lokasi_view',
         ],
     ],
 

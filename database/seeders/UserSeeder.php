@@ -21,6 +21,11 @@ class UserSeeder extends Seeder
                 'email' => 'developer@wangun.co',
                 'password' => bcrypt('password')
             ],
+                        [
+                'uuid' => Generate::uuid(),
+                'email' => 'karyawan@gmail.com',
+                'password' => bcrypt('12345678')
+            ],
         ]);
     }
 }

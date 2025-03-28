@@ -24,6 +24,14 @@ class UserInformationSeeder extends Seeder
                 'notlp' => '081364792547',
                 'alamat' => 'Testing',
             ],
+                        [
+                'uuid' => Generate::uuid(),
+                'user_id' => '2',
+                'signature_file_id' => null,
+                'nama' => 'Karyawan',
+                'notlp' => '081364792547',
+                'alamat' => 'Testing',
+            ],
         ]);
     }
 }

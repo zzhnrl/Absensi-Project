@@ -174,5 +174,9 @@ return [
     [
         'module_name' => 'Password',
         'permission_name' => 'Update',
-    ]
+    ],
+        [
+        'module_name' => 'input lokasi',
+        'permission_name' => 'View',
+    ],
 ];
