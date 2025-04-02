@@ -305,7 +305,7 @@ return [
             // Tambahkan menu Input Lokasi jika role_id adalah 1
         [
             'text' => 'Input Lokasi',
-            'url'  => '/input_lokasi',
+            'url'  => '/input-lokasi',
             'icon' => 'fas fa-map-marker-alt',
             'module_key' => 'input_lokasi_view',
         ],
