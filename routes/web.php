@@ -1,10 +1,16 @@
 <?php
 
+use App\Exports\AbsensiExport;
+use App\Exports\CutiExport;
+use App\Exports\RekapIzinSakitExport;
+use App\Exports\UserExport;
 use App\Http\Controllers\OfficeLocationController;
+use App\Http\Controllers\UserController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
+use Maatwebsite\Excel\Facades\Excel;
 
 /*
 |--------------------------------------------------------------------------
@@ -200,16 +206,17 @@ Route::group(['middleware' => ['auth']], function () {
         ],
     ]);
 
-    Route::resource('user', App\Http\Controllers\UserController::class, [
-        'names' => [
-            'index' => 'user',
-            'create' => 'user.create',
-            'store' => 'user.store',
-            'edit' => 'user.edit',
-            'update' => 'user.update',
-            'delete' => 'user.delete'
-        ],
-    ]);
+Route::resource('user', App\Http\Controllers\UserController::class, [
+    'names' => [
+        'index' => 'user',
+        'create' => 'user.create',
+        'store' => 'user.store',
+        'edit' => 'user.edit',
+        'update' => 'user.update',
+        'delete' => 'user.delete'
+    ],
+])->except(['show']);
+
 
     Route::resource('status_cuti', App\Http\Controllers\StatusCutiController::class, [
         'names' => [
@@ -298,3 +305,24 @@ Route::post('/set-office-location', [OfficeLocationController::class, 'store'])-
 Route::get('/cek-kehadiran', [OfficeLocationController::class, 'cekKehadiran'])->name('cekKehadiran');
 
 Route::get('/get-office-location', [OfficeLocationController::class, 'getOfficeLocation']);
+
+Route::get('/get-sisa-cuti/{id}', [UserController::class, 'getSisaCuti']);
+
+
+Route::get('/cuti/export/excel', function () {
+    return Excel::download(new CutiExport, 'data-cuti.xlsx');
+})->name('cuti.export.excel');
+
+Route::get('/absensi/export/excel', function () {
+    return Excel::download(new AbsensiExport, 'absensi.xlsx');
+})->name('absensi.export.excel');
+
+
+Route::get('/user/export', function () {
+    return Excel::download(new UserExport, 'data_user.xlsx');
+})->name('user.export');
+
+
+Route::get('/rekap-izin-sakit/export', function () {
+    return Excel::download(new RekapIzinSakitExport, 'rekap_izin_sakit.xlsx');
+})->name('rekap_izin_sakit.export');

@@ -12,6 +12,7 @@ use App\Models\UserInformation;
 use Illuminate\Http\Request;
 use App\Exceptions\CustomException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -60,59 +61,108 @@ class UserController extends Controller
         return view('errors.403');
     }
 
+
+public function getSisaCuti($id)
+{
+    $user = User::where('uuid', $id)->first();
+
+    if (!$user) {
+        return response()->json(['error' => 'User tidak ditemukan'], 404);
+    }
+
+    return response()->json(['sisa_cuti' => $user->sisa_cuti]);
+}
+
+
+
+
     /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreUserRequest $request)
-    {
-        DB::beginTransaction();
-        try {
-            if ($request->hasFile('image')) {
-                $file_storage = app('StoreFileStorageService')->execute([
-                    'file' => $request->file('image'),
-                    'location' => 'image/' . now()->format('Y-m-d'),
-                    'filesystem' => 'public',
-                    'compress' => false
-                ], true);
-            }
+public function store(StoreUserRequest $request)
+{
+    DB::beginTransaction();
+    try {
+        // Log data yang diterima dari request
+        Log::info('Data Request:', $request->all());
 
-            if ($request->hasFile('images')) {
-                $file_storage_ttd = app('StoreFileStorageService')->execute([
-                    'file' => $request->file('images'),
-                    'location' => 'images/' . now()->format('Y-m-d'),
-                    'filesystem' => 'public',
-                    'compress' => false
-                ], true);
-            }
-
-            $input_dto = [
-                'photo_uuid' => $file_storage['data']['uuid'] ?? null,
-                'email' => $request->email,
-                'password' => $request->password,
-                'password_confirmation' => $request->password_confirmation,
-                'role_uuid' => $request->role,
-                'signature_file_uuid' => $file_storage_ttd['data']['uuid'] ?? null,
-                'nama' => $request->nama,
-                'notlp' => $request->notlp,
-                'alamat' => $request->alamat,
-            ];
-
-            $user = app('RegisterNewUserService')->execute($input_dto, true);
-
-            $alert = 'success';
-            $message = 'User berhasil dibuat, password ' . $input_dto['password'];
-            DB::commit();
-            return redirect()->route('user')->with($alert, $message);
-        } catch (\Exception $ex) {
-            DB::rollback();
-            $alert = 'danger';
-            $message = $ex->getMessage();
-            return redirect()->back()->withInput()->with($alert, $message);
+        // Simpan Foto Profil
+        $file_storage = null;
+        if ($request->hasFile('image')) {
+            $file_storage = app('StoreFileStorageService')->execute([
+                'file' => $request->file('image'),
+                'location' => 'image/' . now()->format('Y-m-d'),
+                'filesystem' => 'public',
+                'compress' => false
+            ], true);
         }
+
+        // Simpan Tanda Tangan
+        $file_storage_ttd = null;
+        if ($request->hasFile('images')) {
+            $file_storage_ttd = app('StoreFileStorageService')->execute([
+                'file' => $request->file('images'),
+                'location' => 'images/' . now()->format('Y-m-d'),
+                'filesystem' => 'public',
+                'compress' => false
+            ], true);
+        }
+
+        // Cek apakah sisa_cuti dikirim dari form
+        if ($request->filled('sisa_cuti')) {
+            $sisa_cuti = $request->sisa_cuti;
+        } else {
+            $sisa_cuti = null; // Default menjadi null jika tidak diisi
+        }
+
+        // Tentukan role_id berdasarkan role yang dipilih
+        $role_id = null;
+        if ($request->role == 'Karyawan') {
+            $role_id = 3;
+        } elseif ($request->role == 'Manajer') {
+            $role_id = 2;
+        }
+
+        // Log nilai sisa_cuti dan role_id sebelum dikirim ke database
+        Log::info('Nilai sisa_cuti dan role_id setelah diolah:', [
+            'sisa_cuti' => $sisa_cuti,
+            'role_id' => $role_id
+        ]);
+
+        // Data untuk penyimpanan user baru
+        $input_dto = [
+            'photo_uuid' => $file_storage['data']['uuid'] ?? null,
+            'email' => $request->email,
+            'password' => $request->password,
+            'password_confirmation' => $request->password_confirmation,
+            'role_id' => $role_id, // Menyimpan role_id berdasarkan pilihan role
+            'signature_file_uuid' => $file_storage_ttd['data']['uuid'] ?? null,
+            'nama' => $request->nama,
+            'role_uuid' => $request->role,
+            'notlp' => $request->notlp,
+            'alamat' => $request->alamat,
+            'sisa_cuti' => $sisa_cuti, // Pastikan sisa_cuti tetap sesuai dengan yang diinput
+        ];
+
+        // Log data sebelum disimpan ke database
+        Log::info('Data yang akan disimpan ke database:', $input_dto);
+
+        // Simpan data user
+        $user = app('RegisterNewUserService')->execute($input_dto, true);
+
+        DB::commit();
+        return redirect()->route('user')->with('success', 'User berhasil dibuat, password ' . $input_dto['password']);
+    } catch (\Exception $ex) {
+        DB::rollback();
+        Log::error('Terjadi kesalahan saat menyimpan user:', ['error' => $ex->getMessage()]);
+        return redirect()->back()->withInput()->with('danger', $ex->getMessage());
     }
+}
+
+
 
     /**
      * Show the form for editing the specified resource.

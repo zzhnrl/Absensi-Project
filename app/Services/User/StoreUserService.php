@@ -25,6 +25,8 @@ class StoreUserService extends DefaultService implements ServiceInterface
         $user->photo_id = $dto['photo_id'] ?? null;
         $user->email = $dto['email'];
         $user->password = $dto['password'];
+        $user->sisa_cuti = $dto['sisa_cuti'];
+        $user->role_id = $dto['role_id'];
 
         $this->prepareAuditActive($user);
         $this->prepareAuditInsert($user);

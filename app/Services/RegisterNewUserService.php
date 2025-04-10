@@ -20,7 +20,9 @@ class RegisterNewUserService extends DefaultService implements ServiceInterface
                 "photo_uuid" => $dto['photo_uuid'],
                 "email" => $dto['email'],
                 "password" => $dto['password'],
-                "role_uuid" => $dto['role_uuid']
+                "role_uuid" => $dto['role_uuid'],
+                "role_id" => $dto['role_id'],
+                "sisa_cuti" => $dto['sisa_cuti'],
             ], true);
 
             app('StoreUserInformationService')->execute([

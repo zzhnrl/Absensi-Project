@@ -76,6 +76,19 @@
             @error('alamat') <span class="text-danger">{{$message}}</span> @enderror
         </div>
 
+        <div class="form-group">
+            <label for="sisa_cuti">Sisa Cuti</label>
+            <input type="number" class="form-control @error('sisa_cuti') is-invalid @enderror" 
+                id="sisa_cuti" 
+                name="sisa_cuti" 
+                value="{{ old('sisa_cuti', $user->sisa_cuti ?? '') }}">
+            @error('sisa_cuti') 
+                <span class="text-danger">{{ $message }}</span> 
+            @enderror
+        </div>
+
+
+
         <input type="hidden" name="user_information" value="{{$user_information->uuid ?? null}}">
     </div>
 </div>

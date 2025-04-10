@@ -13,6 +13,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 class IzinSakitController extends Controller
 {
@@ -77,7 +78,7 @@ class IzinSakitController extends Controller
             }
 
             if ($request->hasFile('imagess')) {
-                $file_storage_izin_sakit = app('StoreFileStorageService')->execute([
+                $file_storage = app('StoreFileStorageService')->execute([
                     'file' => $request->file('imagess'),
                     'location' => 'imagess/' . now()->format('Y-m-d'),
                     'filesystem' => 'public',
@@ -151,7 +152,19 @@ class IzinSakitController extends Controller
 
             $user = app('StoreIzinSakitService')->execute($input_dto, true);
 
-            DB::commit();
+            
+        DB::commit();
+
+        // Kirim email ke semua admin
+        $adminUsers = \App\Models\User::where('role_id', 1)->get();
+
+        foreach ($adminUsers as $admin) {
+            Mail::to($admin->email)->send(new \App\Mail\IzinSakitNotification(
+                $nama_karyawan,
+                now()->format('Y-m-d'),
+                $request->keterangan
+            ));
+        }
 
             $alert = 'success';
             $message = 'Izin sakit berhasil dibuat';

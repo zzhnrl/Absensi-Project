@@ -18,11 +18,15 @@ class User extends Authenticatable
 
     protected $fillable = [
         'email',
+        'role_id',
+        'sisa_cuti',
     ];
 
     protected $hidden = [
         'id',
         'photo_id',
+        'sisa_cuti',
+        'role_id',
         'signature_file_id',
         'password',
         'remember_token',
@@ -47,6 +51,11 @@ class User extends Authenticatable
     public function userInformation()
     {
         return $this->hasOne(UserInformation::class, 'user_id');
+    }
+
+        public function Role()
+    {
+        return $this->belongsTo(Role::class, 'role_id');
     }
 
     public function photo()
