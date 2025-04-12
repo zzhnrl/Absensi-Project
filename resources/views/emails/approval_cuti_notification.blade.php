@@ -62,15 +62,14 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">Notifikasi Hati <strong>{{ $approvedBy }}</strong></div>
+        <div class="header">Notifikasi Cuti</div>
         <div class="content">
             <p>Halo <strong>{{ $namaKaryawan }}</strong>,</p>
-            <p>Permohonan <strong>{{ $namaKaryawan }}</strong> untuk masuk ke hati <strong>{{ $approvedBy }}</strong> telah <span class="status">{{ ucfirst($status) }}</span> oleh <strong>{{ $approvedBy }}</strong>.</p>
-            <p>Silakan cek Hati <strong>{{ $namaKaryawan }}</strong> untuk detail lebih lanjut.</p>
+            <p>Permohonan cuti Anda telah <span class="status">{{ ucfirst($status) }}</span> oleh <strong>{{ $approvedBy }}</strong>.</p>
+            <p>Silakan cek sistem untuk detail lebih lanjut.</p>
         </div>
         <div class="footer">
-            <p>I LOVE YOU FOREVERR <strong>{{ $namaKaryawan }}</strong></p>
-            <p>© 2025 Hati Yoga | Email ini dikirim secara otomatis, mohon membalas dengan baik hati.</p>
+            <p>© 2025 Perusahaan Anda | Email ini dikirim secara otomatis, mohon tidak membalas.</p>
         </div>
     </div>
 </body>

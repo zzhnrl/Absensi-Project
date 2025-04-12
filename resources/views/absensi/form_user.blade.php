@@ -30,11 +30,11 @@
                 @endforeach
             </select>
             <!-- Input hidden agar data tetap dikirim ke backend -->
-            <input name="kategori_absensi_uuid" id="hidden-kategori">
+            <input type="hidden" name="kategori_absensi_uuid" id="hidden-kategori">
         </div>
 
-        <p id="status">Mendeteksi lokasi...</p>
-        <p id="distanceInfo"></p>
+
+        <p hidden id="distanceInfo"></p>
 
         <div class="form-group mt-3">
             <label>Keterangan</label>
