@@ -122,16 +122,20 @@ public function store(Request $request)
         app('StoreCutiService')->execute($input_dto, true);
 
         // Kirim email ke semua admin (role_id = 1)
-        $admins = DB::table('users')->where('role_id', 1)->pluck('email')->toArray();
+        // Kirim email ke semua user dengan role_id = 1 dan 2
+        $emailsRole1 = DB::table('users')->where('role_id', 1)->pluck('email')->toArray();
+        $emailsRole2 = DB::table('users')->where('role_id', 2)->pluck('email')->toArray();
+        $recipients = array_unique(array_merge($emailsRole1, $emailsRole2));
+
 
 
         try {
-            Mail::to($admins)->send(new CutiNotification($input_dto));
-            Log::info('Email notifikasi cuti berhasil dikirim ke admin.', ['emails' => $admins]);
+            Mail::to($recipients)->send(new CutiNotification($input_dto));
+            Log::info('Email notifikasi cuti berhasil dikirim ke role 1 dan 2.', ['emails' => $recipients]);
         } catch (\Exception $emailEx) {
             Log::error('Gagal mengirim email notifikasi cuti.', [
                 'error' => $emailEx->getMessage(),
-                'emails' => $admins
+                'emails' => $recipients
             ]);
         }
 

@@ -92,3 +92,24 @@
         <input type="hidden" name="user_information" value="{{$user_information->uuid ?? null}}">
     </div>
 </div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("upload-image").addEventListener("change", function (e) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            document.getElementById("preview-image").src = e.target.result;
+        };
+        reader.readAsDataURL(this.files[0]);
+    });
+
+    document.getElementById("upload-images").addEventListener("change", function (e) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            document.getElementById("preview-images").src = e.target.result;
+        };
+        reader.readAsDataURL(this.files[0]);
+    });
+});
+</script>

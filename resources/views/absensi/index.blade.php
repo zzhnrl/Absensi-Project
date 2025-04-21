@@ -10,15 +10,14 @@
 <div class="row">
     <div class="col-12">
         <div class="card">
-            <a href="{{ route('absensi.export.excel') }}" class="btn btn-success btn-md float-right mr-2">
-                <i class="fas fa-file-excel"></i> Export Excel
-            </a>
-
             <div class='card-header'>
                 @if ($breadcrumb) {!! $breadcrumb !!} @endif
                 @if (have_permission('absensi_create'))
                 <a href="{{ route('absensi.create') }}" class="btn btn-primary btn-md float-right"><i class="fas fa-plus"></i></a>
                 @endif
+                            <a href="{{ route('absensi.export.excel') }}" class="btn btn-success btn-md float-right mr-2">
+                <i class="fas fa-file-excel"></i> Export Excel
+            </a>
             </div>
             <br>
             <div class="card-body">

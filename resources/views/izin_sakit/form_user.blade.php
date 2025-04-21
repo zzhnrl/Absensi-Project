@@ -1,7 +1,7 @@
 <div class="row p-2">
     <div class="col-12 col-md-4">
         <label for="upload-image">Foto Bukti</label>
-        <input type="file" id="upload-image" name='image' class="form-control @error('image') is-invalid @enderror" />
+        <input type="file" id="upload-image" name='imagess' class="form-control @error('image') is-invalid @enderror" />
         @error('image')<span class="text-danger">{{$message}}</span> @enderror
         <img id="preview-image" src="{{ (isset($user) and isset($user->photo)) ? $user->photo->url : asset('img/no_picture.png') }}" alt="your image" width="100%" />
         @if(isset($user) && isset($user->photo))

@@ -13,6 +13,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class IzinSakitController extends Controller
@@ -77,6 +78,9 @@ class IzinSakitController extends Controller
                 ])['data'];
             }
 
+            Log::info('Data Request:', $request->all());
+
+                $file_storage = null;
             if ($request->hasFile('imagess')) {
                 $file_storage = app('StoreFileStorageService')->execute([
                     'file' => $request->file('imagess'),

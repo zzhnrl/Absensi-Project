@@ -77,6 +77,8 @@
             </div>
             <p>Silakan cek sistem untuk informasi lebih lanjut.</p>
 
+            <a href="{{ url('/cuti') }}" class="button" style="color: #ffffff;">Buka Halaman Approval</a>
+
         </div>
         <div class="footer">
             <p>© 2025 Perusahaan Anda | Email ini dikirim secara otomatis, mohon tidak membalas.</p>

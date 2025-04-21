@@ -11,14 +11,14 @@
     <div class="col-12">
         <div class="card">
             <div class='card-header'>
-                <a href="{{ route('user.export') }}" class="btn btn-success btn-md float-right mr-2">
-                    <i class="fas fa-file-excel"></i> Export Excel
-                </a>
-
                 @if ($breadcrumb) {!! $breadcrumb !!} @endif
                 @if (have_permission('user_create'))
                 <a href="{{ route('user.create') }}" class="btn btn-primary btn-md float-right"><i class="fas fa-plus"></i></a>
                 @endif
+                                <a href="{{ route('user.export') }}" class="btn btn-success btn-md float-right mr-2">
+                    <i class="fas fa-file-excel"></i> Export Excel
+                </a>
+
             </div>
             <br>
             <div class="card-body">
