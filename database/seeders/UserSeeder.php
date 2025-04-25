@@ -18,12 +18,12 @@ class UserSeeder extends Seeder
         User::insert([
             [
                 'uuid' => Generate::uuid(),
-                'email' => 'developer@wangun.co',
+                'email' => 'nuranurulazizah@gmail.com',
                 'password' => bcrypt('password')
             ],
                         [
                 'uuid' => Generate::uuid(),
-                'email' => 'karyawan@gmail.com',
+                'email' => 'zizahnurazizahh@gmail.com',
                 'password' => bcrypt('12345678')
             ],
         ]);

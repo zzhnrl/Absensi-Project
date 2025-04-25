@@ -38,7 +38,7 @@
         </div>
 
         <div class="form-group">
-            <label class="w-100">Sisa Cuti</label>
+            <label class="w-100">Kuota Cuti</label>
             <input type="text" id="sisa_cuti" class="form-control" readonly>
         </div>
 
@@ -86,7 +86,7 @@
 
         $('#tanggal_mulai, #tanggal_akhir').change(hitungTotalCuti);
 
-        // === GET SISA CUTI ===
+        // === GET KUOTA CUTI ===
         $('#user_uuid').change(function () {
             const nama = $(this).find(':selected').text();
             $('#nama_karyawan').val(nama);

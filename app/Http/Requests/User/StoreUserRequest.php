@@ -27,6 +27,13 @@ class StoreUserRequest extends FormRequest
     public function rules()
     {
         return [
+            'signature_file' => ['required'],
+            'email' => ['required'],
+            'password' => ['required'],
+            'password_confirmation' => ['required'],
+            'role' => ['required'],
+            'nomor_telepon' => ['required'],
+            'alamat' => ['required'],
             'nama' => ['required'],
         ];
     }
@@ -34,7 +41,14 @@ class StoreUserRequest extends FormRequest
     public function messages()
     {
         return [
-            'nama.required' => "Nama tidak boleh kosong",
+            'signature_file.required' => "Wajib diisi",
+            'email.required' => "Wajib diisi",
+            'password.required' => "Wajib diisi",
+            'Password_confirmation.required' => "Wajib diisi",
+            'role.required' => "Wajib diisi",
+            'nomor_telepon' => "Wajib diisi",
+            'alamat.required' => "Wajib diisi",
+            'nama.required' => "Wajib diisi",
         ];
     }
 }

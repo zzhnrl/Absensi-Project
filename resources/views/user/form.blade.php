@@ -77,7 +77,7 @@
         </div>
 
         <div class="form-group">
-            <label for="sisa_cuti">Sisa Cuti</label>
+            <label for="sisa_cuti">Kuota Cuti</label>
             <input type="number" class="form-control @error('sisa_cuti') is-invalid @enderror" 
                 id="sisa_cuti" 
                 name="sisa_cuti" 

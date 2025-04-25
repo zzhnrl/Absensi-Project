@@ -37,6 +37,7 @@ $(function () {
                 { title: "Tanggal", data: 'tanggal' },
                 { title: "Nama Karyawan", data: 'nama_karyawan' },
                 { title: "Kategori", data: 'nama_kategori' },
+                { title: "Status Kehadiran", data: 'status_absen'},
                 { title: "Keterangan", data: 'keterangan' },
                 { title: "Jumlah Point", data: 'jumlah_point' },
             ]

@@ -62,23 +62,23 @@ return [
     //     'permission_name' => 'Delete',
     // ],
 
-    // Status Cuti
-    [
-        'module_name' => 'Status Cuti',
-        'permission_name' => 'Create',
-    ],
-    [
-        'module_name' => 'Status Cuti',
-        'permission_name' => 'View',
-    ],
-    [
-        'module_name' => 'Status Cuti',
-        'permission_name' => 'Edit',
-    ],
-    [
-        'module_name' => 'Status Cuti',
-        'permission_name' => 'Delete',
-    ],
+    // // Status Cuti
+    // [
+    //     'module_name' => 'Status Cuti',
+    //     'permission_name' => 'Create',
+    // ],
+    // [
+    //     'module_name' => 'Status Cuti',
+    //     'permission_name' => 'View',
+    // ],
+    // [
+    //     'module_name' => 'Status Cuti',
+    //     'permission_name' => 'Edit',
+    // ],
+    // [
+    //     'module_name' => 'Status Cuti',
+    //     'permission_name' => 'Delete',
+    // ],
 
     // Absensi
     [
@@ -115,10 +115,10 @@ return [
     ],
 
     // Rekap Izin Sakit
-    [
-        'module_name' => 'Rekap Izin Sakit',
-        'permission_name' => 'Create',
-    ],
+    // [
+    //     'module_name' => 'Rekap Izin Sakit',
+    //     'permission_name' => 'Create',
+    // ],
     [
         'module_name' => 'Rekap Izin Sakit',
         'permission_name' => 'View',
@@ -133,10 +133,10 @@ return [
         'module_name' => 'Cuti',
         'permission_name' => 'View',
     ],
-    [
-        'module_name' => 'Cuti',
-        'permission_name' => 'Update',
-    ],
+    // [
+    //     'module_name' => 'Cuti',
+    //     'permission_name' => 'Update',
+    // ],
     [
         'module_name' => 'Cuti',
         'permission_name' => 'Setujui',
@@ -175,7 +175,7 @@ return [
         'module_name' => 'Password',
         'permission_name' => 'Update',
     ],
-        [
+    [
         'module_name' => 'input lokasi',
         'permission_name' => 'View',
     ],

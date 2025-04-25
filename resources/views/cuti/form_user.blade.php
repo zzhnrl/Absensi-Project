@@ -37,7 +37,7 @@
         </div>
 
         <div class="form-group">
-            <label>Sisa Cuti</label>
+            <label>Kuota Cuti</label>
             <input type="text" class="form-control text-center" value="{{ auth()->user()->sisa_cuti ?? 'Tidak tersedia' }}" disabled>
         </div>
 

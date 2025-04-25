@@ -8,7 +8,7 @@
 
 @section('content_header')
     @if(have_permission('dashboard_view'))
-        <h1 class="text-light">Input Lokasi Kantor</h1>
+        <!-- <h1 class="text-light"></h1> -->
     @endif
 @endsection
 

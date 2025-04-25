@@ -53,7 +53,7 @@ class RoleController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreRoleRequest $request)
     {
         if (have_permission('role_create')) {
             $result = app('StoreRoleService')->execute([

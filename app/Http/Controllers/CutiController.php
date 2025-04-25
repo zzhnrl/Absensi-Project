@@ -104,7 +104,7 @@ public function store(Request $request)
         $totalCuti = $tanggalMulai->diffInDays($tanggalAkhir) + 1;
         $sisaCutiBaru = max(0, $user->sisa_cuti);
 
-        // Update sisa cuti
+        // Update kuota cuti
         DB::table('users')->where('uuid', $user->uuid)->update(['sisa_cuti' => $sisaCutiBaru]);
 
         // Simpan data cuti
@@ -279,7 +279,7 @@ public function setujui(Request $request, $cuti_uuid)
                 'sisa_cuti' => $sisaCutiBaru
             ]);
 
-        Log::info("Sisa cuti karyawan dengan ID {$karyawan->id} berhasil diperbarui menjadi {$sisaCutiBaru}");
+        Log::info("Kuota cuti karyawan dengan ID {$karyawan->id} berhasil diperbarui menjadi {$sisaCutiBaru}");
 
 
 
