@@ -6,6 +6,7 @@
 @stop
 
 @section('content')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <div class="row">
     <div class="col-12">
@@ -42,6 +43,31 @@
 @section('css')
 @stop
 
-@section('js')
+<script>
+fetch('/cuti/store', {
+    method: 'POST',
+    body: formData,
+    headers: {
+        'X-CSRF-TOKEN': csrfToken
+    }
+})
+.then(response => {
+    if (response.status === 403) {
+        return response.json().then(data => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Akses Ditolak',
+                text: data.message
+            });
+        });
+    }
+})
+.catch(error => {
+    console.error('Kesalahan:', error);
+});
 
-@stop
+</script>
+
+
+
+

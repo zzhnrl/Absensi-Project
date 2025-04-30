@@ -79,6 +79,7 @@ public function store(Request $request)
 {
     DB::beginTransaction();
     try {
+        
         // Kalau request bawa user_uuid, gunakan itu. Kalau tidak, fallback ke user yang login
         if ($request->has('user_uuid') && !empty($request->user_uuid)) {
             $user = app('GetUserService')->execute([
@@ -93,7 +94,10 @@ public function store(Request $request)
 
         Log::info("User UUID yang digunakan untuk proses cuti:", ['used_user_uuid' => $user->uuid]);
 
-
+        // ⛔ VALIDASI: ambil sisa cuti dari database, BUKAN dari form
+        if ((int)$user->sisa_cuti <= 0) {
+            abort(403, 'Sisa cuti Anda sudah habis. Pengajuan cuti tidak diizinkan.');
+        }
 
         Log::info('Request user_uuid dari frontend:', ['user_uuid' => $request->user_uuid]);
 
