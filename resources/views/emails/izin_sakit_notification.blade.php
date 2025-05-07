@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Notifikasi Pengajuan Izin Sakit</title>
+    <title>Notifikasi Izin Sakit Karyawan</title>
     <style>
         body {
             background-color: #f2f4f8;
@@ -66,7 +66,7 @@
     <div class="email-wrapper">
         <div class="email-content">
             <div class="email-header">
-                <h2>📢 Pengajuan Izin Sakit</h2>
+                <h2>📢 Izin Sakit Karyawan</h2>
             </div>
             <div class="email-body">
                 <p><span class="label">Nama Karyawan:</span> {{ $karyawan }}</p>

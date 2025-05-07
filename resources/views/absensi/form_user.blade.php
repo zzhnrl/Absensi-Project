@@ -112,8 +112,8 @@ function checkLocation() {
 function pilihKategori(jarak) {
     let kategoriDropdown = document.getElementById("kategori-absensi");
 
-    let kategoriAbsensi = "WFH"; // Default jika jauh dari kantor
-    if (jarak < 100) {
+    let kategoriAbsensi = "WFH"; // Default jika jauh dari kantor lebih dari 100 meter
+    if (jarak < 100) { 
         kategoriAbsensi = "WFO";
     }
 

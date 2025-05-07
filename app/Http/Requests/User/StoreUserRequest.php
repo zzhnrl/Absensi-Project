@@ -27,7 +27,6 @@ class StoreUserRequest extends FormRequest
     public function rules()
     {
         return [
-            'signature_file' => ['required'],
             'email' => ['required'],
             'password' => ['required'],
             'password_confirmation' => ['required'],
@@ -41,7 +40,6 @@ class StoreUserRequest extends FormRequest
     public function messages()
     {
         return [
-            'signature_file.required' => "Wajib diisi",
             'email.required' => "Wajib diisi",
             'password.required' => "Wajib diisi",
             'Password_confirmation.required' => "Wajib diisi",

@@ -77,7 +77,7 @@ class AbsensiController extends Controller
                     'office' => $office
                 ]);
             } else {
-                $alert = 'danger';
+                $alert = 'success';
                 $message = 'Anda sudah melakukan absensi hari ini.';
                 return redirect()->route("absensi")->with($alert, $message);
             }

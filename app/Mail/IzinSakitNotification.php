@@ -22,7 +22,7 @@ class IzinSakitNotification extends Mailable
 
     public function build()
     {
-        return $this->subject('Pengajuan Izin Sakit')
+        return $this->subject('Izin Sakit Karyawan')
             ->view('emails.izin_sakit_notification');
     }
 }
