@@ -11,9 +11,12 @@
     <div class="col-12">
         <div class="card">
             <div class='card-header'>
-            <a href="{{ route('rekap_izin_sakit.export') }}" class="btn btn-success btn-md float-right mr-2">
-                <i class="fas fa-file-excel"></i> Export Excel
-            </a>
+                {{-- Tombol “Export Excel” hanya untuk role_id ≠ 3 --}}
+                @if (Auth::user()->role_id != 3)
+                <a href="{{ route('rekap_izin_sakit.export') }}" class="btn btn-success btn-md float-right mr-2">
+                    <i class="fas fa-file-excel"></i> Export Excel
+                </a>
+                @endif
 
                 @if ($breadcrumb) {!! $breadcrumb !!} @endif
                 <!-- @if (have_permission('rekap_izin_sakit_create'))

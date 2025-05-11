@@ -15,9 +15,12 @@
                 @if (have_permission('user_create'))
                 <a href="{{ route('user.create') }}" class="btn btn-primary btn-md float-right"><i class="fas fa-plus"></i></a>
                 @endif
-                                <a href="{{ route('user.export') }}" class="btn btn-success btn-md float-right mr-2">
+                {{-- Tombol “Export Excel” hanya untuk role_id ≠ 3 --}}
+                @if (Auth::user()->role_id != 3)
+                <a href="{{ route('user.export') }}" class="btn btn-success btn-md float-right mr-2">
                     <i class="fas fa-file-excel"></i> Export Excel
                 </a>
+                @endif
 
             </div>
             <br>
