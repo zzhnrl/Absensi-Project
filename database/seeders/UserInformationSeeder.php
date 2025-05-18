@@ -18,7 +18,7 @@ class UserInformationSeeder extends Seeder
         UserInformation::insert([
             [
                 'uuid' => Generate::uuid(),
-                'user_id' => '12',
+                'user_id' => '1',
                 'signature_file_id' => null,
                 'nama' => 'Master Admin',
                 'notlp' => '081364792547',
@@ -26,7 +26,7 @@ class UserInformationSeeder extends Seeder
             ],
                         [
                 'uuid' => Generate::uuid(),
-                'user_id' => '13',
+                'user_id' => '3',
                 'signature_file_id' => null,
                 'nama' => 'Karyawan',
                 'notlp' => '081364792547',
