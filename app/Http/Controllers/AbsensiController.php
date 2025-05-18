@@ -177,9 +177,9 @@ public function store(Request $request)
             $status_absen = "Alpha / Tidak Hadir";
         }
 
-        // **Perbaikan: Pastikan semua kolom yang diperlukan tidak NULL**
+        // Pastikan semua kolom yang diperlukan tidak NULL
         $absensi = Absensi::create([
-            'uuid' => Str::uuid(), // ✅ **Tambahkan UUID agar tidak NULL**
+            'uuid' => Str::uuid(), // ✅Tambahkan UUID agar tidak NULL
             'user_id' => $user->id,
             'user_uuid' => $user->uuid,
             'kategori_absensi_id' => $kategori_absensis->id,
