@@ -8,6 +8,7 @@ use App\Services\ServiceInterface;
 use App\Models\User;
 use App\Rules\ExistsUuid;
 use App\Rules\UniqueData;
+use Illuminate\Support\Facades\Crypt;
 
 class StoreUserService extends DefaultService implements ServiceInterface
 {
@@ -44,9 +45,9 @@ class StoreUserService extends DefaultService implements ServiceInterface
     public function prepare($dto)
     {
         if (isset($dto['password'])) {
-            $dto['password'] = bcrypt($dto['password']);
+            $dto['password'] = Crypt::encryptString($dto['password']);
         }
-
+        
         if (isset($dto['photo_uuid'])) {
             $dto['photo_id'] = $this->findIdByUuid(FileStorage::query(), $dto['photo_uuid']);
         }

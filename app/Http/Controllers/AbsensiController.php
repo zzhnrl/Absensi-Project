@@ -164,17 +164,26 @@ public function store(Request $request)
             Log::info('Point user baru dibuat:', $point_user->toArray());
         }
 
-        // Menentukan jam masuk
-        $jam_masuk = now()->format('H:i');
+        $now         = Carbon::now('Asia/Jakarta');
+        $jamMasuk    = $now->format('H:i');
+        $totalMenit  = $now->hour * 60 + $now->minute;
 
-        // Menentukan status absensi berdasarkan jam masuk
-        $jamSekarang = now()->hour * 60 + now()->minute;
-        if ($jamSekarang >= 540 && $jamSekarang <= 600) {
+        // Definisi rentang dalam menit
+        $hadirStart     = 9 * 60;          // 09:00 → 540
+        $hadirEnd       = 10 * 60;         // 10:00 → 600
+        $terlambatStart = $hadirEnd + 1;   // 10:01 → 601
+        $terlambatEnd   = 17 * 60;         // 17:00 → 1020
+        $alphaStart     = $terlambatEnd + 1; // 17:01 → 1021
+
+        // Hitung status berdasarkan waktu WIB
+        if ($totalMenit >= $hadirStart && $totalMenit <= $hadirEnd) {
             $status_absen = "Hadir";
-        } elseif ($jamSekarang >= 601 && $jamSekarang <= 1020) {
+        } elseif ($totalMenit >= $terlambatStart && $totalMenit <= $terlambatEnd) {
             $status_absen = "Terlambat";
-        } else {
+        } elseif ($totalMenit >= $alphaStart && $totalMenit < 24 * 60) {
             $status_absen = "Alpha / Tidak Hadir";
+        } else {
+            $status_absen = "Belum Absensi";
         }
 
         // Pastikan semua kolom yang diperlukan tidak NULL
@@ -189,10 +198,8 @@ public function store(Request $request)
             'jumlah_point' => $kategori_absensis->point ?? 0,
             'kategori_absensi_uuid' => $request->kategori_absensi_uuid,
             'keterangan' => $request->keterangan ?? '-',
-            'jam_masuk' => $jam_masuk,
+            'jam_masuk' => $jamMasuk,
             'status_absen' => $status_absen,
-            'created_at' => now(),
-            'updated_at' => now(),
         ]);
 
         Log::info('Absensi berhasil disimpan:', $absensi->toArray());

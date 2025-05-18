@@ -27,7 +27,7 @@
             <div class="card-body">
                 @include('user.filter')
                 <br>
-                <table id="datatable" class="table table-md table-hover dt-responsive nowrap" width="100%">
+                <table id="datatable" class="table table-md table-hover dt-responsive nowrap" width="100%" data-role-id="{{ auth()->user()->role_id }}">
                     <thead>
                     </thead>
                     <tbody>

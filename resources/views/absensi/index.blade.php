@@ -12,9 +12,17 @@
         <div class="card">
             <div class='card-header'>
                 @if ($breadcrumb) {!! $breadcrumb !!} @endif
-                @if (have_permission('absensi_create'))
-                <a href="{{ route('absensi.create') }}" class="btn btn-primary btn-md float-right"><i class="fas fa-plus"></i></a>
-                @endif
+                @php
+    // ambil jam sekarang di WIB
+    $currentHour = \Carbon\Carbon::now('Asia/Jakarta')->hour;
+@endphp
+
+@if (have_permission('absensi_create') && $currentHour < 17)
+    <a href="{{ route('absensi.create') }}"
+       class="btn btn-primary btn-md float-right">
+       <i class="fas fa-plus"></i>
+    </a>
+@endif
                 {{-- Tombol “Export Excel” hanya untuk role_id ≠ 3 --}}
                 @if (Auth::user()->role_id != 3)
                 <a href="{{ route('absensi.export.excel') }}" class="btn btn-success btn-md float-right mr-2">

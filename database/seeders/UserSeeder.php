@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Helpers\Generate;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Crypt;
 
 class UserSeeder extends Seeder
 {
@@ -19,13 +20,15 @@ class UserSeeder extends Seeder
             [
                 'uuid' => Generate::uuid(),
                 'email' => 'nuranurulazizah@gmail.com',
-                'password' => bcrypt('password')
+                'password' => Crypt::encryptString('password')
             ],
                         [
                 'uuid' => Generate::uuid(),
                 'email' => 'zizahnurazizahh@gmail.com',
-                'password' => bcrypt('12345678')
+                'password' => Crypt::encryptString('12345678'),
             ],
+
+            
         ]);
     }
 }
