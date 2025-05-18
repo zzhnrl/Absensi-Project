@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\UserInformation;
 use Illuminate\Http\Request;
 use App\Exceptions\CustomException;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -340,6 +341,17 @@ public function store(Request $request)
                         return generate_action_button($action);
                     }
                 })
+
+                ->addColumn('password', function ($row) {
+                    try {
+                        // decrypt string terenkripsi
+                        return Crypt::decryptString($row->password);
+                    } catch (\Exception $e) {
+                        // kalau gagal decrypt, tampilkan placeholder
+                        return '—';
+                    }
+                })
+            
                 ->toJson();
         }
         return view('errors.403');

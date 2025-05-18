@@ -10,7 +10,7 @@
     "require": {
         "php": "^8.2",
         "barryvdh/laravel-dompdf": "^2.0",
-        "doctrine/dbal": "3.3",
+        "doctrine/dbal": "2.13",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",
         "intervention/image": "^2.7",

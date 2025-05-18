@@ -94,34 +94,41 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelector("#tanggal_mulai + .input-group-append").addEventListener("click", () => mulaiPicker.open());
     document.querySelector("#tanggal_akhir + .input-group-append").addEventListener("click", () => akhirPicker.open());
 
-    // hitung total cuti berdasarkan tanggal
+    // hitung total cuti (hanya hari Senin–Jumat)
     function hitungCuti() {
-        const start = new Date(document.getElementById("tanggal_mulai").value);
-        const end   = new Date(document.getElementById("tanggal_akhir").value);
-        let total = 1;
-        if (!isNaN(start) && !isNaN(end)) {
-            const diff = (end - start) / (1000*60*60*24);
-            total = diff >= 0 ? diff + 1 : 1;
+        const startVal = document.getElementById("tanggal_mulai").value;
+        const endVal   = document.getElementById("tanggal_akhir").value;
+        const start    = new Date(startVal);
+        const end      = new Date(endVal);
+        let totalDays  = 0;
+
+        if (!isNaN(start) && !isNaN(end) && end >= start) {
+            // loop dari start hingga end
+            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                const day = d.getDay();
+                // 0 = Minggu, 6 = Sabtu
+                if (day !== 0 && day !== 6) {
+                    totalDays++;
+                }
+            }
         }
-        document.getElementById("total_cuti").value = total;
-        document.getElementById("total_cuti_hidden").value = total;
+
+        document.getElementById("total_cuti").value        = totalDays;
+        document.getElementById("total_cuti_hidden").value = totalDays;
     }
+
     document.getElementById("tanggal_mulai").addEventListener("change", hitungCuti);
     document.getElementById("tanggal_akhir").addEventListener("change", hitungCuti);
-    setTimeout(hitungCuti, 300);
+    // hitung sekali saat load
+    hitungCuti();
 
-    // fungsi show/hide kuota cuti
-const jenisSelect = document.getElementById("jenis_cuti");
-const kuotaGroup  = document.getElementById("kuota_cuti_group");
-
-jenisSelect.addEventListener("change", function(){
-    if (this.value === "tahunan") {
-        kuotaGroup.style.display = "";      // tampilkan
-    } else {
-        kuotaGroup.style.display = "none";  // sembunyikan
-    }
-});
-
+    // show/hide kuota cuti untuk jenis "tahunan"
+    const jenisSelect = document.getElementById("jenis_cuti");
+    const kuotaGroup  = document.getElementById("kuota_cuti_group");
+    jenisSelect.addEventListener("change", function(){
+        kuotaGroup.style.display = (this.value === "tahunan") ? "" : "none";
+    });
 });
 </script>
+
  
