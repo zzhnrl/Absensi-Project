@@ -24,6 +24,7 @@ class StoreCutiService extends DefaultService implements ServiceInterface
         $cuti->nama_karyawan = $dto['nama_karyawan'];
         $cuti->tanggal_mulai = $dto['tanggal_mulai'];
         $cuti->tanggal_akhir = $dto['tanggal_akhir'];
+        $cuti->jenis_cuti = $dto['jenis_cuti'];
         $cuti->keterangan = $dto['keterangan'] ?? null;
 
         $this->prepareAuditActive($cuti);

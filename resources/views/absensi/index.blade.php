@@ -15,12 +15,9 @@
                 @if (have_permission('absensi_create'))
                 <a href="{{ route('absensi.create') }}" class="btn btn-primary btn-md float-right"><i class="fas fa-plus"></i></a>
                 @endif
-                <!-- {{-- Tombol “Export Excel” hanya untuk role_id ≠ 3 --}} -->
-                @if (Auth::user()->role_id != 3)
-                <a href="{{ route('absensi.export.excel') }}" class="btn btn-success btn-md float-right mr-2">
-                    <i class="fas fa-file-excel"></i> Export Excel
-                </a>
-                @endif
+                            <a href="{{ route('absensi.export.excel') }}" class="btn btn-success btn-md float-right mr-2">
+                <i class="fas fa-file-excel"></i> Export Excel
+            </a>
             </div>
             <br>
             <div class="card-body">

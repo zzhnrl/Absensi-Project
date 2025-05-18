@@ -121,6 +121,7 @@ public function store(Request $request)
             'tanggal_akhir' => $request->tanggal_akhir,
             'perihal' => $request->perihal,
             'keterangan' => $request->keterangan,
+            'jenis_cuti' => $request->jenis_cuti,
         ];
 
         app('StoreCutiService')->execute($input_dto, true);
@@ -223,12 +224,12 @@ public function setujui(Request $request, $cuti_uuid)
 {
     DB::beginTransaction();
     try {
-        // Ambil user yang sedang login
+        // 1. Ambil user approver
         $user = app('GetUserService')->execute([
             'user_uuid' => auth()->user()->uuid,
         ])['data'];
 
-        // Ambil nama yang menyetujui dari tabel user_informations
+        // 2. Ambil nama penyetuju
         $approver = DB::table('user_informations')
             ->where('user_id', $user->id)
             ->first();
@@ -237,87 +238,85 @@ public function setujui(Request $request, $cuti_uuid)
             throw new \Exception('Data user_informations tidak ditemukan');
         }
 
-        $status_cuti_setuju = StatusCuti::find(2);
+        // 3. Status disetujui
+        $statusCutiSetuju = StatusCuti::findOrFail(2);
 
-        // Ambil data cuti yang sedang diproses
+        // 4. Ambil data cuti
         $cuti = DB::table('cutis')->where('uuid', $cuti_uuid)->first();
         if (!$cuti) {
             throw new \Exception('Data cuti tidak ditemukan');
         }
 
-        
-
-        $input_dto = [
-            'cuti_uuid' => $cuti_uuid,
-            'status_cuti_uuid' => $status_cuti_setuju->uuid, 
-            'nama_karyawan' => $request->nama_karyawan,
-            'tanggal_mulai' => $request->tanggal_mulai,
-            'tanggal_akhir' => $request->tanggal_akhir,
-            'perihal' => $request->perihal,
-            'keterangan' => $request->keterangan,
-            'approve_at' => now(),
-            'approve_by' => $user->id,
-        ];
-        
+        // 5. Ambil karyawan yang mengajukan
         $karyawan = DB::table('users')->where('id', $cuti->user_id)->first();
-
-        $tanggalMulai = Carbon::parse($cuti->tanggal_mulai)->startOfDay();
-        $tanggalAkhir = Carbon::parse($cuti->tanggal_akhir)->startOfDay();
-
-        if ($tanggalMulai->eq($tanggalAkhir)) {
-            $totalCuti = 1;
-        } else {
-            $totalCuti = $tanggalMulai->diffInDays($tanggalAkhir) + 1;
+        if (!$karyawan) {
+            throw new \Exception('Data user tidak ditemukan');
         }
 
-        $sisaCutiBaru = max(0, $karyawan->sisa_cuti - $totalCuti);
+        // 6. Hitung total hari cuti
+        $tanggalMulai = Carbon::parse($cuti->tanggal_mulai)->startOfDay();
+        $tanggalAkhir = Carbon::parse($cuti->tanggal_akhir)->startOfDay();
+        $totalCuti = $tanggalMulai->eq($tanggalAkhir)
+            ? 1
+            : $tanggalMulai->diffInDays($tanggalAkhir) + 1;
 
         Log::info("Total cuti yang dihitung: {$totalCuti}");
-        Log::info("Tanggal Mulai Cuti: " . $tanggalMulai->toDateString());
-        Log::info("Tanggal Akhir Cuti: " . $tanggalAkhir->toDateString());
+        Log::info("Jenis cuti: {$cuti->jenis_cuti}");
 
+        // 7. Update sisa_cuti hanya jika jenis_cuti = 'tahunan'
+        if ($cuti->jenis_cuti === 'tahunan') {
+            $sisaCutiBaru = max(0, $karyawan->sisa_cuti - $totalCuti);
 
-        DB::table('users')
-            ->where('id', $karyawan->id)
-            ->update([
-                'sisa_cuti' => $sisaCutiBaru
-            ]);
+            DB::table('users')
+                ->where('id', $karyawan->id)
+                ->update(['sisa_cuti' => $sisaCutiBaru]);
 
-        Log::info("Kuota cuti karyawan dengan ID {$karyawan->id} berhasil diperbarui menjadi {$sisaCutiBaru}");
+            Log::info("Kuota cuti karyawan ID {$karyawan->id} dikurangi menjadi {$sisaCutiBaru}");
+        } else {
+            Log::info("Jenis cuti bukan tahunan ({$cuti->jenis_cuti}), kuota cuti tidak dikurangi.");
+        }
 
+        // 8. Prepare DTO untuk update status cuti
+        $input_dto = [
+            'cuti_uuid'       => $cuti_uuid,
+            'status_cuti_uuid'=> $statusCutiSetuju->uuid,
+            'nama_karyawan'   => $cuti->nama_karyawan,
+            'tanggal_mulai'   => $cuti->tanggal_mulai,
+            'tanggal_akhir'   => $cuti->tanggal_akhir,
+            'keterangan'      => $cuti->keterangan,
+            'approve_at'      => now(),
+            'approve_by'      => $user->id,
+        ];
 
-
+        // 9. Update Cuti
         app('UpdateCutiService')->execute($input_dto, true);
 
-        // Ambil email karyawan dari tabel users berdasarkan user_id di tabel cutis
-        $karyawan = DB::table('users')->where('id', $cuti->user_id)->first();
-        
-
-        if ($karyawan && !empty($karyawan->email)) {
-            Mail::to($karyawan->email)->send(new CutiApprovalNotification('disetujui', $cuti->nama_karyawan, $approver->nama));
-            Log::info("Email notifikasi cuti disetujui terkirim ke karyawan: " . $karyawan->email);
-            Log::info("Nama Karyawan: " . $cuti->nama_karyawan);
-            Log::info("Nama Penyetuju: " . $approver->nama);
-
+        // 10. Kirim notifikasi email ke karyawan
+        if (!empty($karyawan->email)) {
+            Mail::to($karyawan->email)
+                ->send(new CutiApprovalNotification('disetujui', $cuti->nama_karyawan, $approver->nama));
+            Log::info("Email notifikasi cuti disetujui terkirim ke: {$karyawan->email}");
         } else {
-            Log::warning("Email karyawan tidak ditemukan untuk notifikasi cuti yang disetujui.");
+            Log::warning("Email karyawan tidak ditemukan untuk notifikasi cuti disetujui.");
         }
 
         DB::commit();
+
         return response()->json([
             'success' => true,
-            'message' => 'Cuti berhasil disetujui dan notifikasi dikirim ke karyawan'
+            'message' => 'Cuti berhasil disetujui dan notifikasi dikirim ke karyawan',
         ], 200);
 
     } catch (\Exception $ex) {
         DB::rollback();
-        Log::error("Gagal mengirim notifikasi cuti yang disetujui: " . $ex->getMessage());
+        Log::error("Gagal proses persetujuan cuti: " . $ex->getMessage());
         return response()->json([
             'success' => false,
-            'message' => $ex->getMessage()
+            'message' => $ex->getMessage(),
         ], 500);
     }
 }
+
 
 
 

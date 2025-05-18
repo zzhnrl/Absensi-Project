@@ -31,6 +31,20 @@
 
         <input type="hidden" name="nama_karyawan" id="nama_karyawan">
 
+        {{-- Jenis Cuti --}}
+<div class="form-group">
+    <label>Jenis Cuti</label>
+    <select name="jenis_cuti" id="jenis_cuti" class="form-control" required>
+        <option value="">-- Pilih Jenis Cuti --</option>
+        <option value="tahunan">Cuti Tahunan</option>
+        <option value="sakit">Cuti Sakit</option>
+        <option value="alasan_penting">Cuti Karena Alasan Penting</option>
+        <option value="besar">Cuti Besar</option>
+        <option value="melahirkan">Cuti Melahirkan</option>
+        <option value="diluar_tanggungan">Cuti Diluar Tanggungan Negara</option>
+    </select>
+</div>
+
         <div class="form-group">
             <label>Total Cuti</label>
             <input type="text" id="total_cuti" class="form-control" value="0" disabled>

@@ -42,6 +42,7 @@ $(function () {
                 { title: "Kuota Cuti", data: 'sisa_cuti' },
                 { title: "Nama Karyawan", data: 'nama_karyawan' },
                 { title: "Keterangan", data: 'keterangan' },
+                { title: "Jenis Cuti", data: 'jenis_cuti' },
                 { title: "Status", data: 'status_cuti.nama',
                     render: function(data, type, row) {
                         let statusClass = '';
