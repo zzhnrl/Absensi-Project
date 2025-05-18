@@ -39,6 +39,7 @@ $(function () {
             column: [
                 { title: "Tanggal Mulai Cuti", data: 'tanggal_mulai' },
                 { title: "Tanggal Akhir Cuti", data: 'tanggal_akhir' },
+                { title: "Kuota Cuti", data: 'sisa_cuti' },
                 { title: "Nama Karyawan", data: 'nama_karyawan' },
                 { title: "Keterangan", data: 'keterangan' },
                 { title: "Status", data: 'status_cuti.nama',

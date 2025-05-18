@@ -23,15 +23,22 @@
         </div>
 
         <div class="form-group">
-            <label>Kategori (Otomatis)</label>
-            <select id="kategori-absensi" class="select2 form-control" disabled>
-                @foreach ($kategori_absensis as $kategori)
-                    <option value="{{ $kategori->uuid }}" data-name="{{ $kategori->name }}">{{ $kategori->name }}</option>
-                @endforeach
-            </select>
-            <!-- Input hidden agar data tetap dikirim ke backend -->
-            <input type="hidden" name="kategori_absensi_uuid" id="hidden-kategori">
-        </div>
+      <label>Jarak ke Kantor (meter)</label>
+      <input type="text" class="form-control" id="distanceInfo" name="jarak_ke_kantor" readonly>
+    </div>
+
+    <div class="form-group">
+      <label>Kategori (Otomatis)</label>
+      <select id="kategori-absensi" class="select2 form-control" disabled>
+        @foreach ($kategori_absensis as $kategori)
+          <option value="{{ $kategori->uuid }}"
+                  data-name="{{ $kategori->name }}">
+            {{ $kategori->name }}
+          </option>
+        @endforeach
+      </select>
+      <input type="hidden" name="kategori_absensi_uuid" id="hidden-kategori">
+    </div>
 
 
         <p hidden id="distanceInfo"></p>
@@ -75,63 +82,57 @@ function updateTime() {
 }
 
 function checkLocation() {
-    if (!navigator.geolocation) {
-        document.getElementById("status").innerText = "❌ Geolocation tidak didukung.";
-        return;
-    }
+  if (!navigator.geolocation) {
+    return alert("❌ Geolocation tidak didukung.");
+  }
 
-    navigator.geolocation.getCurrentPosition(function(position) {
-        const userLat = position.coords.latitude;
-        const userLng = position.coords.longitude;
+  navigator.geolocation.getCurrentPosition(pos => {
+    const userLat = pos.coords.latitude,
+          userLng = pos.coords.longitude,
+          officeLat = parseFloat("{{ $office->latitude ?? 0 }}"),
+          officeLng = parseFloat("{{ $office->longitude ?? 0 }}"),
+          distance = getDistance(userLat, userLng, officeLat, officeLng);
 
-        const officeLat = parseFloat("{{ $office->latitude ?? 0 }}");
-        const officeLng = parseFloat("{{ $office->longitude ?? 0 }}");
+    // Tampilkan jarak dalam meter
+    document.getElementById("distanceInfo").value = distance.toFixed(2) + " m";
 
-        console.log(`📍 Lokasi Pengguna: Lat ${userLat}, Lng ${userLng}`);
+    // Pilih kategori: < 1 km → WFO, else WFH
+    const uuid = pilihKategori(distance);
+// jika kamu sudah include jQuery + Select2
+const $sel = $('#kategori-absensi');
+$sel.val(uuid)               // set value underlying <select>
+    .trigger('change.select2'); // beri tahu Select2 untuk rerender
+$('#hidden-kategori').val(uuid);
 
-        if (!officeLat || !officeLng) {
-            document.getElementById("status").innerText = "❌ Lokasi kantor belum diatur.";
-            return;
-        }
+  }, err => {
+    console.error(err);
+    alert("Gagal mendapatkan lokasi: " + err.message);
+  });
+}
 
-        const distance = getDistance(userLat, userLng, officeLat, officeLng);
-        console.log(`📏 Jarak ke Kantor: ${distance} meter`);
-
-        document.getElementById("distanceInfo").innerText = `Jarak ke kantor: ${distance.toFixed(2)} meter`;
-
-        let kategoriUUID = pilihKategori(distance);
-        if (kategoriUUID) {
-            document.getElementById("kategori-absensi").value = kategoriUUID;
-            document.getElementById("hidden-kategori").value = kategoriUUID;
-        }
-
-        console.log(`📌 Kategori Absensi Terpilih: ${kategoriUUID}`);
-    });
+function getDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const dLat = (lat2 - lat1) * Math.PI/180;
+  const dLon = (lon2 - lon1) * Math.PI/180;
+  const a = Math.sin(dLat/2)**2 +
+            Math.cos(lat1 * Math.PI/180)*Math.cos(lat2 * Math.PI/180) *
+            Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
 function pilihKategori(jarak) {
-    let kategoriDropdown = document.getElementById("kategori-absensi");
+  // jarak dalam meter: <1000m → WFO, >=1000m → WFH
+  const nama = jarak < 1000 ? "WFO" : "WFH";
+  console.log(`📌 Kategori Berdasarkan Jarak: ${nama}`);
 
-    let kategoriAbsensi = "WFH"; // Default jika jauh dari kantor lebih dari 100 meter
-    if (jarak < 100) { 
-        kategoriAbsensi = "WFO";
+  const dropdown = document.getElementById("kategori-absensi");
+  for (let opt of dropdown.options) {
+    if (opt.dataset.name === nama) {
+      return opt.value;
     }
-
-    console.log(`📌 Kategori Berdasarkan Jarak: ${kategoriAbsensi}`);
-
-    let selectedUUID = "";
-
-    // Loop kategori untuk mencari UUID yang cocok dengan kategori yang dipilih
-    for (let option of kategoriDropdown.options) {
-        if (option.getAttribute("data-name") === kategoriAbsensi) {
-            selectedUUID = option.value;
-            break;
-        }
-    }
-
-    return selectedUUID;
+  }
+  return "";
 }
-
 
 // Fungsi untuk update kategori absensi otomatis
 function updateKategori(status) {
@@ -156,17 +157,6 @@ function updateKategori(status) {
 }
 
 
-// Fungsi untuk menghitung jarak antara dua koordinat (Haversine formula)
-function getDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371000; // Radius bumi dalam meter
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-}
 
 
 </script>
