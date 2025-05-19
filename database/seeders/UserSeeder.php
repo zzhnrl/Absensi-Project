@@ -20,14 +20,15 @@ class UserSeeder extends Seeder
             [
                 'uuid' => Generate::uuid(),
                 'email' => 'nuranurulazizah@gmail.com',
+                'role_id' => '1',
                 'password' => Crypt::encryptString('password')
             ],
                         [
                 'uuid' => Generate::uuid(),
                 'email' => 'zizahnurazizahh@gmail.com',
+                'role_id' => '3',
                 'password' => Crypt::encryptString('12345678'),
             ],
-
             
         ]);
     }
