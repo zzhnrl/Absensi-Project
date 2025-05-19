@@ -342,15 +342,15 @@ public function store(Request $request)
                     }
                 })
 
-                ->addColumn('password', function ($row) {
-                    try {
-                        // decrypt string terenkripsi
-                        return Crypt::decryptString($row->password);
-                    } catch (\Exception $e) {
-                        // kalau gagal decrypt, tampilkan placeholder
-                        return '—';
-                    }
-                })
+                // ->addColumn('password', function ($row) {
+                //     try {
+                //         // decrypt string terenkripsi
+                //         return Crypt::decryptString($row->password);
+                //     } catch (\Exception $e) {
+                //         // kalau gagal decrypt, tampilkan placeholder
+                //         return '—';
+                //     }
+                // })
             
                 ->toJson();
         }

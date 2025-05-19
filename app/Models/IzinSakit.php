@@ -21,7 +21,7 @@ class IzinSakit extends Model
 
     protected $hidden = [
         'id',
-        'foto_bukti_id',
+        'photo_id',
         'created_by',
         'updated_by',
         'deleted_by',

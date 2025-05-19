@@ -80,7 +80,7 @@ class IzinSakitController extends Controller
 
             Log::info('Data Request:', $request->all());
 
-                $file_storage = null;
+            $file_storage = null;
             if ($request->hasFile('imagess')) {
                 $file_storage = app('StoreFileStorageService')->execute([
                     'file' => $request->file('imagess'),
@@ -160,7 +160,7 @@ class IzinSakitController extends Controller
         DB::commit();
 
         // Kirim email ke semua admin
-        $adminUsers = \App\Models\User::where('role_id', 1)->get();
+        $adminUsers = \App\Models\User::where('role_id', 2)->get();
 
         foreach ($adminUsers as $admin) {
             Mail::to($admin->email)->send(new \App\Mail\IzinSakitNotification(
