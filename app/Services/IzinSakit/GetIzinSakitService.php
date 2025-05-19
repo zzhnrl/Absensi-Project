@@ -14,81 +14,91 @@ class GetIzinSakitService extends DefaultService implements ServiceInterface
 {
     public function process($dto)
     {
-        $dto['per_page'] = $dto['per_page'] ?? 10;
-        $dto['page'] = $dto['page'] ?? 1;
-        $dto['sort_by'] = $dto['sort_by'] ?? 'updated_at';
-        $dto['sort_type'] = $dto['sort_type'] ?? 'desc';
+        // 1) Default parameters
+        $perPage    = $dto['per_page']    = $dto['per_page']  ?? 10;
+        $page       = $dto['page']        = $dto['page']      ?? 1;
+        $sortBy     = $dto['sort_by']     = $dto['sort_by']   ?? 'updated_at';
+        $sortType   = $dto['sort_type']   = $dto['sort_type'] ?? 'desc';
+        $withPaging = !empty($dto['with_pagination']);
 
-        $model = IzinSakit::where('deleted_at', null)
-            ->orderBy($dto['sort_by'], $dto['sort_type']);
+        // 2) Base query
+        $query = IzinSakit::query()
+            ->whereNull('deleted_at')
+            ->orderBy($sortBy, $sortType);
 
-        if (isset($dto['search_param']) and $dto['search_param'] != null) {
-            $model->where(function ($q) use ($dto) {
-                $q->where('nama', 'ILIKE', '%' . $dto['search_param'] . '%');
-            });
+        // 3) Search & filters
+        if (!empty($dto['search_param'])) {
+            $query->where('nama', 'ILIKE', '%'.$dto['search_param'].'%');
         }
 
-        if (isset($dto['user_id_in'])) {
-            $model->whereIn('user_id', $dto['user_id_in']);
+        if (!empty($dto['user_id_in'])) {
+            $query->whereIn('user_id', $dto['user_id_in']);
         }
 
-        if (isset($dto['month'])) {
-            $model->where('bulan', $dto['month']);
+        if (!empty($dto['month'])) {
+            $query->where('bulan', $dto['month']);
         }
 
-        if (isset($dto['year'])) {
-            $model->where('tahun', $dto['year']);
+        if (!empty($dto['year'])) {
+            $query->where('tahun', $dto['year']);
         }
 
-        if (isset($dto['user_uuid']) and $dto['user_uuid'] != '') {
-            $user_id = $this->findIdByUuid(User::query(), $dto['user_uuid']);
-            $model->where('user_id', $user_id);
+        if (!empty($dto['user_uuid'])) {
+            $uid = $this->findIdByUuid(User::query(), $dto['user_uuid']);
+            $query->where('user_id', $uid);
         }
 
-        if (isset($dto['photo_uuid']) and $dto['photo_uuid'] != '') {
-            $photo_id = $this->findIdByUuid(FileStorage::query(), $dto['photo_uuid']);
-            $model->where('photo_id', $photo_id);
+        if (!empty($dto['photo_uuid'])) {
+            $pid = $this->findIdByUuid(FileStorage::query(), $dto['photo_uuid']);
+            $query->where('photo_id', $pid);
         }
 
-        if (isset($dto['date_range'])) {
-            $date = explode(' to ', $dto['date_range']);
-
-            if (!isset($date[1])) {
-                $model->where(function ($q) use ($dto,$date) {
-                    $date1 = Carbon::parse($date[0])->format('Y-m-d');
-                    $q->whereDate('tanggal',  $date1);
-                });
-            }else  {
-                $model->where(function ($q) use ($dto,$date) {
-                    $date1 = Carbon::parse($date[0])->format('Y-m-d');
-                    $q->whereDate('tanggal','>=',  $date1);
-                });
-                $model->where(function ($q) use ($dto,$date) {
-                    $date2 = Carbon::parse($date[1])->format('Y-m-d');
-                    $q->whereDate('tanggal','<=',  $date2);
-                });
+        // 4) Safe date_range parsing (abaikan jika 'undefined' atau kosong)
+        $dr = trim((string)($dto['date_range'] ?? ''));
+        if ($dr !== '' && strtolower($dr) !== 'undefined') {
+            // pastikan format "YYYY-MM-DD - YYYY-MM-DD" atau "YYYY-MM-DD"
+            $parts = preg_split('/\s*[-to]+\s*/i', $dr);
+            $start = Carbon::parse($parts[0])->startOfDay();
+            if (isset($parts[1])) {
+                $end = Carbon::parse($parts[1])->endOfDay();
+                $query->whereBetween('tanggal', [$start, $end]);
+            } else {
+                $query->whereDate('tanggal', $start);
             }
         }
 
-        if (isset($dto['izin_sakit_uuid']) and $dto['izin_sakit_uuid'] != '') {
-            $model->where('uuid', $dto['izin_sakit_uuid']);
-            $data = $model->first();
+        // 5) Handle detail vs list
+        if (!empty($dto['izin_sakit_uuid'])) {
+            // detail single record
+            $this->results['data'] = $query->first();
+            // tidak perlu pagination
         } else {
-            if (isset($dto['with_pagination'])) {
-                $this->results['pagination'] = $this->paginationDetail($dto['per_page'], $dto['page'], $model->count());
-                $model = $this->paginateData($model, $dto['per_page'], $dto['page']);
+            // hitung total sebelum pagination
+            $total = $query->count();
+
+            if ($withPaging) {
+                // simpan info pagination
+                $this->results['pagination'] = $this->paginationDetail($perPage, $page, $total);
+                // ambil hanya halaman $page
+                $query = $this->paginateData($query, $perPage, $page);
+            } else {
+                // jika ingin full list tanpa pagination
+                $this->results['pagination'] = [
+                    'total_data' => $total,
+                ];
             }
-            $data = $model->get();
+
+            // ambil data
+            $this->results['data'] = $query->get();
         }
 
         $this->results['message'] = "Izin sakit successfully fetched";
-        $this->results['data'] = $data;
     }
 
     public function rules($dto)
     {
         return [
-            'izin_sakit_uuid' => ['nullable', 'uuid', new ExistsUuid('izin_sakits')]
+            'izin_sakit_uuid' => ['nullable','uuid', new ExistsUuid('izin_sakits')],
         ];
     }
 }
