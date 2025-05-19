@@ -40,6 +40,7 @@ class CutiController extends Controller
         return view('cuti.index', [
             'breadcrumb' => breadcrumb($breadcrumb),
             'users' => $users['data'],
+            'sisa_cuti' => $users['data'],
             'status_cutis' => $status_cutis['data']
         ]);
 
@@ -474,6 +475,11 @@ public function tolak(Request $request, $cuti_uuid)
                     "recordsFiltered" => $cuti['pagination']['total_data'],
                 ])
 
+                ->addColumn('sisa_cuti', function ($row) {
+                    $sisaCuti = DB::table('users')->where('id', $row->user_id)->value('sisa_cuti');
+                    return $sisaCuti ?? '-';
+                })
+                
                 ->rawColumns(['action', 'approval', 'tanggal_keputusan', 'pemberi_keputusan'])
                 ->editColumn('approval', function ($row){
                     if ($row ->status_cuti_id == 1 && auth()->user()->userRole->role_id !=3) {

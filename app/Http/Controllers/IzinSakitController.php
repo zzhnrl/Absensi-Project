@@ -7,7 +7,6 @@ use App\Exceptions\CustomException;
 use App\Http\Requests\IzinSakit\StoreIzinSakitRequest;
 use App\Http\Requests\IzinSakit\GetIzinSakitRequest;
 use App\Models\IzinSakit;
-use App\Mail\IzinSakitNotification;
 use App\Models\RekapIzinSakit;
 use App\Models\PointUser;
 use App\Models\User;
@@ -161,7 +160,7 @@ class IzinSakitController extends Controller
         DB::commit();
 
         // Kirim email ke semua admin
-        $adminUsers = \App\Models\User::where('role_id', 2)->get();
+        $adminUsers = \App\Models\User::where('role_id', 1)->get();
 
         foreach ($adminUsers as $admin) {
             Mail::to($admin->email)->send(new \App\Mail\IzinSakitNotification(

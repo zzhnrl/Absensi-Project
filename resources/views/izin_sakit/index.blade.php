@@ -1,6 +1,6 @@
 @extends('adminlte::page')
 
-@section('title', 'Rekap Izin Sakit')
+@section('title', 'Izin Sakit')
 
 @section('content_header')
 @stop
@@ -11,6 +11,11 @@
     <div class="col-12">
         <div class="card">
             <div class='card-header'>
+                @if ($breadcrumb) {!! $breadcrumb !!} @endif
+                @if (have_permission('izin_sakit_create'))
+                    <a href="{{ route('izin_sakit.create') }}" class="btn btn-primary btn-md float-right"><i class="fas fa-plus"></i></a>
+                @endif
+
                 {{-- Tombol “Export Excel” hanya untuk role_id ≠ 3 --}}
                 @if (Auth::user()->role_id != 3)
                 <a href="{{ route('rekap_izin_sakit.export') }}" class="btn btn-success btn-md float-right mr-2">
@@ -49,5 +54,5 @@
 
 @section('js')
 <script
-    <script src="{{ asset('js/page/page-rekap-izin-sakit.js') }}" type="module"></script>
+    <script src="{{ asset('js/page/page-izin-sakit.js') }}" type="module"></script>
 @stop
