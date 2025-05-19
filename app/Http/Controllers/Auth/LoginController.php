@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\View;
 
 class LoginController extends Controller
@@ -46,21 +48,36 @@ class LoginController extends Controller
 
     protected function login(Request $request)
     {
-
         $request->validate([
-            'email' => 'required',
+            'email'    => 'required|email',
             'password' => 'required',
         ]);
 
-        $credentials = $request->only('email', 'password');
-        $credentials['is_active'] = 1;
-        $credentials['deleted_at'] = null;
-
         $failed_message = 'Oppes! You have entered invalid credentials';
 
-        if (Auth::attempt($credentials)) {
+        // 1. Ambil user yang aktif & belum dihapus
+        $user = User::where('email', $request->email)
+                    ->where('is_active', 1)
+                    ->whereNull('deleted_at')
+                    ->first();
+
+        if (! $user) {
+            return redirect()->back()->withErrors(['email' => $failed_message]);
+        }
+
+        // 2. Decrypt password dari DB
+        try {
+            $decrypted = Crypt::decryptString($user->password);
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['email' => $failed_message]);
+        }
+
+        // 3. Cocokkan input dengan hasil decrypt
+        if ($request->password === $decrypted) {
+            Auth::login($user, $request->filled('remember'));
             return redirect()->route('home');
         }
+
         return redirect()->back()->withErrors(['email' => $failed_message]);
     }
 
