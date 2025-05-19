@@ -32,7 +32,11 @@ $(function () {
                 { width: "15%", title: "Foto Bukti", data: 'pbukti' },
                 { title: "Nama Karyawan", data: 'nama_karyawan' },
                 { title: "Keterangan", data: 'keterangan' },
-            ]
+            ],
+            error(xhr, status, err) {
+                console.error('Izin Sakit Ajax Error:', status, err);
+                console.error('Response Text:', xhr.responseText);
+            }
         })
     }
 

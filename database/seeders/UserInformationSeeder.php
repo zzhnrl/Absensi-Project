@@ -26,7 +26,7 @@ class UserInformationSeeder extends Seeder
             ],
                         [
                 'uuid' => Generate::uuid(),
-                'user_id' => '3',
+                'user_id' => '2',
                 'signature_file_id' => null,
                 'nama' => 'Karyawan',
                 'notlp' => '081364792547',

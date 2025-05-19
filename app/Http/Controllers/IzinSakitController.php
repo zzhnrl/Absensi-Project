@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Yajra\DataTables\Facades\DataTables;
 
 class IzinSakitController extends Controller
 {
@@ -219,7 +220,15 @@ class IzinSakitController extends Controller
 
     public function grid(GetIzinSakitRequest $request)
     {
-        if (have_permission('izin_sakit_view')) {
+        if (! have_permission('izin_sakit_view')) {
+            return response()->json([
+                'data'            => [],
+                'recordsTotal'    => 0,
+                'recordsFiltered' => 0,
+                'error'           => 'Forbidden',
+            ], 403);
+        }
+        try {
             $approved_role_all = [1,2];
             $user_ids = in_array(auth()->user()->userRole->role_id, $approved_role_all)
             ? User::pluck('id')->toArray()
@@ -256,7 +265,15 @@ class IzinSakitController extends Controller
                     }
                 })
                 ->toJson();
+            } catch (\Throwable $e) {
+                // 4) Tangkap semua error dan kembalikan JSON 500
+                Log::error('IzinSakit grid error: '.$e->getMessage());
+                return response()->json([
+                    'data'            => [],
+                    'recordsTotal'    => 0,
+                    'recordsFiltered' => 0,
+                    'error'           => $e->getMessage(),
+                ], 500);
+            }
         }
-        return view('errors.403');
-    }
 }
