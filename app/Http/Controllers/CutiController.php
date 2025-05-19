@@ -254,14 +254,20 @@ public function setujui(Request $request, $cuti_uuid)
             throw new \Exception('Data user tidak ditemukan');
         }
 
-        // 6. Hitung total hari cuti
-        $tanggalMulai = Carbon::parse($cuti->tanggal_mulai)->startOfDay();
-        $tanggalAkhir = Carbon::parse($cuti->tanggal_akhir)->startOfDay();
-        $totalCuti = $tanggalMulai->eq($tanggalAkhir)
-            ? 1
-            : $tanggalMulai->diffInDays($tanggalAkhir) + 1;
+// 6. Hitung total hari cuti (hanya Senin–Jumat)
+$tanggalMulai = Carbon::parse($cuti->tanggal_mulai)->startOfDay();
+$tanggalAkhir = Carbon::parse($cuti->tanggal_akhir)->startOfDay();
 
-        Log::info("Total cuti yang dihitung: {$totalCuti}");
+$totalCuti = 0;
+for ($date = $tanggalMulai->copy(); $date->lte($tanggalAkhir); $date->addDay()) {
+    // Carbon::SUNDAY = 0, Carbon::SATURDAY = 6
+    if (! in_array($date->dayOfWeek, [Carbon::SATURDAY, Carbon::SUNDAY])) {
+        $totalCuti++;
+    }
+}
+
+Log::info("Total cuti yang dihitung (tanpa Sabtu & Minggu): {$totalCuti}");
+
         Log::info("Jenis cuti: {$cuti->jenis_cuti}");
 
         // 7. Update sisa_cuti hanya jika jenis_cuti = 'tahunan'
