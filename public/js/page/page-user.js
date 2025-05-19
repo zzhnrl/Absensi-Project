@@ -6,7 +6,7 @@ $(function () {
     const datatable         = $('#datatable');
     const role_filter       = $('#role-filter');
     // ambil role_id dari attribute
-    // const currentUserRoleId = parseInt(datatable.data('role-id'), 10);
+    const currentUserRoleId = parseInt(datatable.data('role-id'), 10);
 
     fetchData();
 
@@ -32,13 +32,13 @@ $(function () {
         ];
 
         // kalau yang login role_id = 1, tambahkan kolom Password
-        // if (currentUserRoleId === 1) {
-        //     columns.push({
-        //       title: "Password",
-        //       data: "password",   // sekarang sudah ada
-        //       orderable: false
-        //     });
-        //   }
+        if (currentUserRoleId === 1) {
+            columns.push({
+              title: "Password",
+              data: "password",   // sekarang sudah ada
+              orderable: false
+            });
+          }
           
 
         datatableHandleFetchData({

@@ -13,8 +13,14 @@
     {{-- Username field --}}
     <div class="row mb-3">
         <div class="col-12">
-            <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
-                value="{{ old('email') }}" placeholder="Email" autofocus>
+            <input
+              type="email"
+              name="email"
+              class="form-control @error('email') is-invalid @enderror"
+              value="{{ old('email') }}"
+              placeholder="Email"
+              autofocus
+            >
             @error('email')
             <span class="invalid-feedback" role="alert">
                 <strong>{{ $message }}</strong>
@@ -23,42 +29,49 @@
         </div>
     </div>
 
-    {{-- Password field --}}
+    {{-- Password field with show/hide --}}
     <div class="row mb-3">
         <div class="col-12">
-            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror"
-                placeholder="{{ __('adminlte::adminlte.password') }}">
-            @error('password')
-            <span class="invalid-feedback" role="alert">
-                <strong>{{ $message }}</strong>
-            </span>
-            @enderror
+            <div class="input-group">
+                <input
+                  id="password"
+                  type="password"
+                  name="password"
+                  class="form-control @error('password') is-invalid @enderror"
+                  placeholder="{{ __('adminlte::adminlte.password') }}"
+                >
+                <div class="input-group-append">
+                    <span class="input-group-text">
+                        <a href="#" id="togglePassword" style="color: inherit;">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                    </span>
+                </div>
+                @error('password')
+                <span class="invalid-feedback" role="alert">
+                    <strong>{{ $message }}</strong>
+                </span>
+                @enderror
+            </div>
         </div>
     </div>
-    {{-- Login field --}}
+
+    {{-- Login button --}}
     <div class="row">
-        <!-- <div class="col-7">
-            <div class="icheck-primary" title="{{ __('adminlte::adminlte.remember_me_hint') }}">
-                <input type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
-
-                <label for="remember">
-                    {{ __('adminlte::adminlte.remember_me') }}
-                </label>
-            </div>
-        </div> -->
-
         <div class="col-5">
-            <button type=submit class="btn btn-block {{ config('adminlte.classes_auth_btn', 'btn-flat btn-primary') }}">
+            <button
+              type="submit"
+              class="btn btn-block {{ config('adminlte.classes_auth_btn', 'btn-flat btn-primary') }}"
+            >
                 <span class="fas fa-sign-in-alt"></span>
             </button>
         </div>
     </div>
-
 </form>
 @stop
 
 @section('auth_footer')
-{{-- Passwordresetlink --}}
+{{-- Password reset link --}}
 @if(isset($password_reset_url))
 <!-- <p class="my-0">
     <a href="{{ $password_reset_url }}" class="text-white">
@@ -75,4 +88,23 @@
     </a>
 </p>
 @endif
+@stop
+
+@section('adminlte_js')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggle = document.getElementById('togglePassword');
+    const pwd    = document.getElementById('password');
+    if (!toggle || !pwd) return;
+
+    toggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        // toggle type
+        const type = pwd.getAttribute('type') === 'password' ? 'text' : 'password';
+        pwd.setAttribute('type', type);
+        // toggle eye icon
+        this.querySelector('i').classList.toggle('fa-eye-slash');
+    });
+});
+</script>
 @stop
