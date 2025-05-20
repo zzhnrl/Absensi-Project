@@ -40,6 +40,7 @@ $(function () {
                 { title: "Status Kehadiran", data: 'status_absen'},
                 { title: "Keterangan", data: 'keterangan' },
                 { title: "Jumlah Point", data: 'jumlah_point' },
+                
             ]
         })
     }
