@@ -13,9 +13,9 @@
             <div class='card-header'>
                 @if ($breadcrumb) {!! $breadcrumb !!} @endif
                 @php
-                    // ambil jam sekarang di WIB
-                    $currentHour = \Carbon\Carbon::now('Asia/Jakarta')->hour;
-                @endphp
+    // ambil jam sekarang di WIB
+    $currentHour = \Carbon\Carbon::now('Asia/Jakarta')->hour;
+@endphp
 
 @if (have_permission('absensi_create'))
     <a 
