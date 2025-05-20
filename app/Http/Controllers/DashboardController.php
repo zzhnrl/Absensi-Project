@@ -67,7 +67,7 @@ class DashboardController extends Controller
 
                     $wfo_count = Absensi::where('deleted_at', null)
                         ->where('user_id', $row->user->id)
-                        ->where('kategori_absensi_id', 1)
+                        ->where('kategori_absensi_id', 2)
                         ->whereMonth('tanggal', $monthNumber)
                         ->whereYear('tanggal', $year)
                         ->count();
