@@ -17,6 +17,7 @@
                     $currentHour = \Carbon\Carbon::now('Asia/Jakarta')->hour;
                 @endphp
 
+<<<<<<< HEAD
                 @if (have_permission('absensi_create') && $currentHour < 17)
                     <a href="{{ route('absensi.create') }}"
                     class="btn btn-primary btn-md float-right">
@@ -24,6 +25,21 @@
                     </a>
                 @endif
                 
+=======
+@if (have_permission('absensi_create'))
+    <a 
+      href="{{ route('absensi.create') }}"
+      class="btn btn-primary btn-md float-right @if($currentHour >= 17) disabled @endif"
+      @if($currentHour >= 17)
+        aria-disabled="true"
+        onclick="return false;"
+      @endif
+    >
+      <i class="fas fa-plus"></i>
+    </a>
+@endif
+
+>>>>>>> 98505da76690b0f89f78d24e033fdb1d18ef4075
                 {{-- Tombol “Export Excel” hanya untuk role_id ≠ 3 --}}
                 @if (Auth::user()->role_id != 3)
                 <a href="{{ route('absensi.export.excel') }}" class="btn btn-success btn-md float-right mr-2">
