@@ -81,14 +81,14 @@ class DashboardController extends Controller
                     $monthNumber = array_search($month, $months);
                     $year = $request->input('year'); 
 
-                    $wfo_count = Absensi::where('deleted_at', null)
+                    $wfh_count = Absensi::where('deleted_at', null)
                         ->where('user_id', $row->user->id)
                         ->where('kategori_absensi_id', 1)
                         ->whereMonth('tanggal', $monthNumber)
                         ->whereYear('tanggal', $year)
                         ->count();
                     
-                    return $wfo_count;
+                    return $wfh_count;
                 })
 
                 // ->addColumn('izin_sakit', function ($row) use ($request) {
