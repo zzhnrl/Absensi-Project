@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\UserInformation;
 use App\Rules\ExistsUuid;
 use App\Rules\UniqueData;
+use Illuminate\Support\Facades\Crypt;
 
 class UpdateUserService extends DefaultService implements ServiceInterface
 {
@@ -65,7 +66,7 @@ class UpdateUserService extends DefaultService implements ServiceInterface
         }
 
         if (isset($dto['password'])) {
-            $dto['password'] = bcrypt($dto['password']);
+            $dto['password'] = Crypt::encryptString($dto['password']);
         }
 
         if (isset($dto['photo_uuid'])) {

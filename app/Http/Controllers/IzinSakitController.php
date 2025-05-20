@@ -160,16 +160,17 @@ class IzinSakitController extends Controller
             
         DB::commit();
 
-        // Kirim email ke semua admin
-        $adminUsers = \App\Models\User::where('role_id', 1)->get();
+// Kirim email ke semua admin (role_id 1) dan super‐admin (role_id 2)
+$adminUsers = \App\Models\User::whereIn('role_id', [1, 2])->get();
 
-        foreach ($adminUsers as $admin) {
-            Mail::to($admin->email)->send(new \App\Mail\IzinSakitNotification(
-                $nama_karyawan,
-                now()->format('Y-m-d'),
-                $request->keterangan
-            ));
-        }
+foreach ($adminUsers as $admin) {
+    Mail::to($admin->email)->send(new \App\Mail\IzinSakitNotification(
+        $nama_karyawan,
+        now()->format('Y-m-d'),
+        $request->keterangan
+    ));
+}
+
 
             $alert = 'success';
             $message = 'Izin sakit berhasil dibuat';
