@@ -4,12 +4,20 @@ export function datatableHandleFetchData ({html, url, column,columnDefs=null, se
         title: "Created At",
         data: 'created_at',
         defaultContent: '-',
-        render: function(data) {
-          return data
-            ? moment(data, 'YYYY-MM-DD HH:mm:ss').format('DD/MM/YYYY HH:mm:ss')
-            : '-';
+        render: function (data) {
+            if (!data) return '-';
+
+            // Coba sebagai Unix timestamp
+            if (!isNaN(data) && String(data).length <= 11) {
+                return moment.unix(data).format("DD/MM/YYYY HH:mm:ss");
+            }
+
+            // Coba sebagai string waktu standar
+            const parsed = moment(data, 'YYYY-MM-DD HH:mm:ss', true);
+            return parsed.isValid() ? parsed.format("DD/MM/YYYY HH:mm:ss") : '-';
         }
-      });
+    });
+
       
     if (withAction) column.push({ width: '10%',title: "Action", data: 'action' })
 

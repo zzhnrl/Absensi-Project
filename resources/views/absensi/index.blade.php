@@ -13,22 +13,21 @@
             <div class='card-header'>
                 @if ($breadcrumb) {!! $breadcrumb !!} @endif
                 @php
-    // ambil jam sekarang di WIB
-    $currentHour = \Carbon\Carbon::now('Asia/Jakarta')->hour;
-@endphp
+                    // ambil jam sekarang di WIB 
+                    $currentHour = \Carbon\Carbon::now('Asia/Jakarta')->hour;
+                @endphp
 
-@if (have_permission('absensi_create'))
-    <a 
-      href="{{ route('absensi.create') }}"
-      class="btn btn-primary btn-md float-right @if($currentHour >= 17) disabled @endif"
-      @if($currentHour >= 17)
-        aria-disabled="true"
-        onclick="return false;"
-      @endif
-    >
-      <i class="fas fa-plus"></i>
-    </a>
-@endif
+                @if (have_permission('absensi_create'))
+                    <a 
+                        href="{{ route('absensi.create') }}"
+                        class="btn btn-primary btn-md float-right @if($currentHour >= 17) disabled @endif"
+                        @if($currentHour >= 17)
+                            aria-disabled="true"
+                            onclick="return false;"
+                        @endif
+                        <i class="fas fa-plus"></i>
+                    </a>
+                @endif
 
                 {{-- Tombol “Export Excel” hanya untuk role_id ≠ 3 --}}
                 @if (Auth::user()->role_id != 3)
@@ -62,6 +61,6 @@
 @stop
 
 @section('js')
-<script
+<!-- <script> -->
     <script src="{{ asset('js/page/page-absensi.js') }}" type="module"></script>
 @stop

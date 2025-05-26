@@ -37,7 +37,7 @@
     <select name="jenis_cuti" id="jenis_cuti" class="form-control" required>
         <option value="">-- Pilih Jenis Cuti --</option>
         <option value="tahunan">Cuti Tahunan</option>
-        <option value="sakit">Cuti Sakit</option>
+        <!-- <option value="sakit">Cuti Sakit</option> -->
         <option value="alasan_penting">Cuti Karena Alasan Penting</option>
         <option value="besar">Cuti Besar</option>
         <option value="melahirkan">Cuti Melahirkan</option>
