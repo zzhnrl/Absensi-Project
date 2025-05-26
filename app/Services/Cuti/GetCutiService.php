@@ -9,6 +9,7 @@ use App\Services\DefaultService;
 use App\Services\ServiceInterface;
 use App\Rules\ExistsUuid;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class GetCutiService extends DefaultService implements ServiceInterface
 {
@@ -77,7 +78,14 @@ class GetCutiService extends DefaultService implements ServiceInterface
 
         $this->results['message'] = "Cuti successfully fetched";
         $this->results['data'] = $data;
-    }
+
+                // Tambahkan sisa_cuti pengguna saat ini
+                $currentUser = Auth::user();
+                $this->results['sisa_cuti'] = $currentUser->sisa_cuti ?? 0;
+            }
+    
+
+    
 
     public function rules($dto)
     {

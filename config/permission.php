@@ -179,4 +179,9 @@ return [
         'module_name' => 'input lokasi',
         'permission_name' => 'View',
     ],
+    // History Point User
+[
+    'module_name'     => 'History Point User',
+    'permission_name' => 'View',
+],
 ];

@@ -24,7 +24,8 @@ class Absensi extends Model
         'nama_karyawan',
         'nama_kategori',
         'tanggal',
-        'jumlah_point'
+        'jumlah_point',
+        'bukti_foto_dikantor',
     ];
 
     protected $hidden = [

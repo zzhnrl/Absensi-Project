@@ -7,7 +7,7 @@
         type="text" 
         class="flatpickr-daterange form-control" 
         id="absensi-date" 
-        value="{{ now()->format('Y-m-d') }}" 
+        value="{{ \Carbon\Carbon::now('Asia/Jakarta')->format('Y-m-d') }}"
         disabled
       >
     </div>
@@ -84,6 +84,19 @@
         placeholder="Masukkan keterangan tambahan"
       >{{ old('keterangan') }}</textarea>
       @error('keterangan')
+        <span class="text-danger">{{ $message }}</span>
+      @enderror
+    </div>
+    {{-- Bukti Foto di Kantor --}}
+    <div class="form-group">
+      <label>Bukti Foto di Kantor</label>
+      <input 
+        type="file" 
+        name="bukti_foto_dikantor" 
+        accept="image/*" 
+        class="form-control @error('bukti_foto_dikantor') is-invalid @enderror"
+      >
+      @error('bukti_foto_dikantor')
         <span class="text-danger">{{ $message }}</span>
       @enderror
     </div>

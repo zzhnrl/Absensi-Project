@@ -7,6 +7,7 @@ use App\Exceptions\CustomException;
 use App\Http\Requests\Absensi\StoreAbsensiRequest;
 use App\Http\Requests\Absensi\GetAbsensiRequest;
 use App\Models\Absensi;
+use App\Models\HistoryPointUser;
 use App\Models\PointUser;
 use App\Models\KategoriAbsensi;
 use App\Models\User;
@@ -186,21 +187,69 @@ public function store(Request $request)
             $status_absen = "Belum Absensi";
         }
 
+        $request->validate([
+    // …
+    'bukti_foto_dikantor' => 'nullable|image|max:2048',
+]);
+
+if ($request->hasFile('bukti_foto_dikantor')) {
+    $path = $request->file('bukti_foto_dikantor')
+                    ->store('absensi/bukti', 'public');
+    $data['bukti_foto_dikantor'] = $path;
+}
+
+
         // Pastikan semua kolom yang diperlukan tidak NULL
-        $absensi = Absensi::create([
-            'uuid' => Str::uuid(), // ✅Tambahkan UUID agar tidak NULL
-            'user_id' => $user->id,
-            'user_uuid' => $user->uuid,
-            'kategori_absensi_id' => $kategori_absensis->id,
-            'tanggal' => now()->toDateString(),
-            'nama_kategori' => $kategori_absensis->name,
-            'nama_karyawan' => $nama_karyawan,
-            'jumlah_point' => $kategori_absensis->point ?? 0,
-            'kategori_absensi_uuid' => $request->kategori_absensi_uuid,
-            'keterangan' => $request->keterangan ?? '-',
-            'jam_masuk' => $jamMasuk,
-            'status_absen' => $status_absen,
-        ]);
+// … setelah memanggil hasFile dan menyimpan $data['bukti_foto_dikantor']
+$attributes = [
+    'uuid'                  => Str::uuid(),
+    'user_id'               => $user->id,
+    'user_uuid'             => $user->uuid,
+    'kategori_absensi_id'   => $kategori_absensis->id,
+    'tanggal'               => $now->toDateString(),
+    'nama_kategori'         => $kategori_absensis->name,
+    'nama_karyawan'         => $nama_karyawan,
+    'jumlah_point'          => $kategori_absensis->point ?? 0,
+    'kategori_absensi_uuid' => $request->kategori_absensi_uuid,
+    'keterangan'            => $request->keterangan ?? '-',
+    'jam_masuk'             => $jamMasuk,
+    'status_absen'          => $status_absen,
+];
+
+// Jika ada foto, tambahkan ke attributes
+if (isset($data['bukti_foto_dikantor'])) {
+    $attributes['bukti_foto_dikantor'] = $data['bukti_foto_dikantor'];
+}
+
+// Simpan Absensi
+$absensi = Absensi::create($attributes);
+
+
+// 1. Hitung perubahan poin berdasarkan nama kategori
+if ($kategori_absensis->name === 'WFH') {
+    $deltaPoint = 4;
+} elseif ($kategori_absensis->name === 'WFO') {
+    $deltaPoint = 6;
+} else {
+    // fallback pakai nilai default dari kategori
+    $deltaPoint = $kategori_absensis->point ?? 0;
+}
+
+// 2. Pastikan $point_user sudah berisi record terbaru
+//    (karena di atas kita sudah update atau create PointUser)
+//    jadi total poin sekarang ada di $point_user->jumlah_point
+
+// 3. Simpan ke history
+$history = HistoryPointUser::create([
+    'uuid'             => Str::uuid(),               // kalau tabel punya kolom uuid
+    'user_id'          => $user->id,
+    'jumlah_point'     => $point_user->jumlah_point, // total poin setelah update
+    'perubahan_point'  => $deltaPoint,          
+    'tanggal' => $now->toDateString(),     // selisih poin
+]);
+
+
+
 
         Log::info('Absensi berhasil disimpan:', $absensi->toArray());
 
@@ -299,6 +348,17 @@ public function store(Request $request)
                         return generate_action_button($action);
                     }
                 })
+                            // Kolom Bukti Foto
+                            ->addColumn('bukti_foto', function($row) {
+                                if ($row->bukti_foto_dikantor) {
+                                    return "<img src=\"{$row->bukti_foto_url}\" 
+                                                 style=\"max-width:50px;max-height:50px;border-radius:4px;\" 
+                                                 alt=\"Bukti Foto\">";
+                                }
+                                return '-';
+                            })
+                            ->rawColumns(['bukti_foto','action'])
+                            
                 ->toJson();
         }
         return view('errors.403');

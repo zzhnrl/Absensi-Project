@@ -3,7 +3,7 @@
         <div class="form-group">
             <label>Tanggal</label>
             <input type="text" class="form-control" name="date" 
-                   id="absensi-date" value="{{ now()->format('Y-m-d') }}" disabled>
+                   id="absensi-date" value="{{ \Carbon\Carbon::now('Asia/Jakarta')->format('Y-m-d') }}" disabled>
         </div>
 
         <div class="form-group">
@@ -68,11 +68,14 @@ function updateTime() {
 
     console.log(`⏰ Waktu Sekarang: ${currentTime}`);
 
-    let statusAbsensi = "Alpha / Tidak Hadir";
+    // hitung status berdasarkan WIB
+    let statusAbsensi;
     if (hours >= 9 && hours <= 10) {
         statusAbsensi = "Hadir";
-    } else if (hours >= 10 && hours < 17) {
+    } else if (hours > 10 && hours < 17) {
         statusAbsensi = "Terlambat";
+    } else {
+        statusAbsensi = "Alpha / Tidak Hadir";
     }
 
     document.getElementById("status-absensi").value = statusAbsensi;

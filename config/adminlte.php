@@ -309,6 +309,15 @@ return [
             'icon' => 'fas fa-map-marker-alt',
             'module_key' => 'input_lokasi_view',
         ],
+
+        // di file config/adminlte.php, dalam bagian 'menu' => [
+        [
+            'text'       => 'Riwayat Poin Saya',
+            'url'        => '/history-point',     // route yang sudah dibuat
+            'icon'       => 'fas fa-history',
+            'module_key' => 'history_point_view',
+        ],
+
     ],
 
     /*

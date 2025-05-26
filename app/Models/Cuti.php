@@ -23,6 +23,8 @@ class Cuti extends Model
         'reject_at',
         'reject_by',
         'jenis_cuti',
+        'sisa_cuti',
+        'jumlah_cuti',
     ];
 
     protected $hidden = [

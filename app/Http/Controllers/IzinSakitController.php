@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Exceptions\CustomException;
 use App\Http\Requests\IzinSakit\StoreIzinSakitRequest;
 use App\Http\Requests\IzinSakit\GetIzinSakitRequest;
+use App\Models\HistoryPointUser;
 use App\Models\IzinSakit;
 use App\Models\RekapIzinSakit;
 use App\Models\PointUser;
@@ -116,6 +117,10 @@ class IzinSakitController extends Controller
                 ->where('bulan', $bulan)
                 ->where('tahun', $tahun)
                 ->first();
+            
+
+                $now         = Carbon::now('Asia/Jakarta');
+
 
             if (!$rekap_izin_sakit) {
                 // Jika tidak ada data rekap izin sakit, buat data baru
@@ -141,16 +146,25 @@ class IzinSakitController extends Controller
                     $point_user = PointUser::where('nama_karyawan', $user->userInformation->nama)->first();
                     if ($point_user) {
                         $point_user->decrement('jumlah_point', 3);
+                                // Catat ke history_point_users
+        HistoryPointUser::create([
+            'user_id'          => $user->id,
+            'jumlah_point'     => $point_user->jumlah_point,  // total poin setelah dikurangi
+            'perubahan_point'  => -3,
+            'tanggal' => $now->toDateString(),                         // perubahan poin
+        ]);
                     } else {
                         throw new \Exception("User point not found");
                     }
                 }
             }
 
+            $now         = Carbon::now('Asia/Jakarta');
+
             $input_dto = [
                 'user_uuid' => $user->uuid,
                 'nama_karyawan' => $user->userInformation->nama,
-                'tanggal' => now(),
+                'tanggal' => $now->toDateString(),
                 'photo_uuid' => $file_storage['data']['uuid'] ?? null,
                 'keterangan' => $request->keterangan,
             ];

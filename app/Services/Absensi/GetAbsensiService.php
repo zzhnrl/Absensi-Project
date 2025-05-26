@@ -74,6 +74,22 @@ class GetAbsensiService extends DefaultService implements ServiceInterface
             $data = $model->get();
         }
 
+
+                // Generate full URL using asset() for correct domain and port
+                if ($data instanceof \Illuminate\Support\Collection) {
+                    $data = $data->map(function ($item) {
+                        $item->bukti_foto_url = $item->bukti_foto_dikantor
+                            ? asset('storage/' . ltrim($item->bukti_foto_dikantor, '/'))
+                            : null;
+                        return $item;
+                    });
+                } elseif ($data) {
+                    $data->bukti_foto_url = $data->bukti_foto_dikantor
+                        ? asset('storage/' . ltrim($data->bukti_foto_dikantor, '/'))
+                        : null;
+                }
+        
+
         $this->results['message'] = "Absensi successfully fetched";
         $this->results['data'] = $data;
     }

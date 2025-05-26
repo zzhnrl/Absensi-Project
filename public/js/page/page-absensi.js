@@ -40,6 +40,20 @@ $(function () {
                 { title: "Status Kehadiran", data: 'status_absen'},
                 { title: "Keterangan", data: 'keterangan' },
                 { title: "Jumlah Point", data: 'jumlah_point' },
+
+                {
+                    title:      "Bukti Foto",
+                    data:       'bukti_foto_url',    // properti yang dikirim service
+                    orderable:  false,
+                    searchable: false,
+                    render:     function(url) {
+                      return url
+                        ? `<img src="${url}" 
+                                style="max-width:100px; max-height:100px; border-radius:4px;"
+                                alt="Bukti Foto">`
+                        : '-';
+                    }
+                  }
                 
             ]
         })

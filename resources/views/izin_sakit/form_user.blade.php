@@ -17,7 +17,7 @@
     <div class="col-12 col-md-8">
         <div class="form-group">
             <label>Tanggal</label>
-            <input type="text" class="flatpickr-daterange form-control" placeholder="Pick date range" name="date_izin_sakit" id="date-izin-sakit" value="{{ Carbon\Carbon::now()->format('Y-m-d') }}" disabled>
+            <input type="text" class="flatpickr-daterange form-control" placeholder="Pick date range" name="date_izin_sakit" id="date-izin-sakit" value="{{ \Carbon\Carbon::now('Asia/Jakarta')->format('Y-m-d') }}" disabled>
         </div>
 
         <div class="form-group">

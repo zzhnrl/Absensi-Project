@@ -4,6 +4,7 @@ export function datatableHandleFetchData ({html, url, column,columnDefs=null, se
         title: "Created At",
         data: 'created_at',
         defaultContent: '-',
+<<<<<<< HEAD
         render: function (data) {
             if (!data) return '-';
 
@@ -15,9 +16,16 @@ export function datatableHandleFetchData ({html, url, column,columnDefs=null, se
             // Coba sebagai string waktu standar
             const parsed = moment(data, 'YYYY-MM-DD HH:mm:ss', true);
             return parsed.isValid() ? parsed.format("DD/MM/YYYY HH:mm:ss") : '-';
+=======
+        render: function(data) {
+          return data
+            ? moment(data).format('DD/MM/YYYY HH:mm:ss')
+            : '-';
+>>>>>>> f6bd93d0e8e634b5f89f6238888172453e02796c
         }
     });
 
+      
       
     if (withAction) column.push({ width: '10%',title: "Action", data: 'action' })
 
