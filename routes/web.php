@@ -4,6 +4,7 @@ use App\Exports\AbsensiExport;
 use App\Exports\CutiExport;
 use App\Exports\RekapIzinSakitExport;
 use App\Exports\UserExport;
+use App\Http\Controllers\HistoryPointUserController;
 use App\Http\Controllers\OfficeLocationController;
 use App\Http\Controllers\UserController;
 use App\Models\User;
@@ -326,3 +327,9 @@ Route::get('/user/export', function () {
 Route::get('/rekap-izin-sakit/export', function () {
     return Excel::download(new RekapIzinSakitExport, 'rekap_izin_sakit.xlsx');
 })->name('rekap_izin_sakit.export');
+
+
+Route::middleware('auth')->group(function () {
+    Route::get('/history-point', [HistoryPointUserController::class, 'index'])
+         ->name('history-point.index');
+});

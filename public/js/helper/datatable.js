@@ -6,10 +6,11 @@ export function datatableHandleFetchData ({html, url, column,columnDefs=null, se
         defaultContent: '-',
         render: function(data) {
           return data
-            ? moment(data, 'YYYY-MM-DD HH:mm:ss').format('DD/MM/YYYY HH:mm:ss')
+            ? moment(data).format('DD/MM/YYYY HH:mm:ss')
             : '-';
         }
       });
+      
       
     if (withAction) column.push({ width: '10%',title: "Action", data: 'action' })
 

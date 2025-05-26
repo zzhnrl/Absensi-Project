@@ -13,22 +13,42 @@
             <div class='card-header'>
                 @if ($breadcrumb) {!! $breadcrumb !!} @endif
                 @php
-    // ambil jam sekarang di WIB
-    $currentHour = \Carbon\Carbon::now('Asia/Jakarta')->hour;
-@endphp
+                    use Carbon\Carbon;
+                    use App\Models\IzinSakit;
+                    use App\Models\Cuti;
 
-@if (have_permission('absensi_create'))
-    <a 
-      href="{{ route('absensi.create') }}"
-      class="btn btn-primary btn-md float-right @if($currentHour >= 17) disabled @endif"
-      @if($currentHour >= 17)
-        aria-disabled="true"
-        onclick="return false;"
-      @endif
-    >
-      <i class="fas fa-plus"></i>
-    </a>
-@endif
+                    $today       = Carbon::now('Asia/Jakarta')->toDateString(); // YYYY-MM-DD
+                    $currentHour = Carbon::now('Asia/Jakarta')->hour;
+                    $user        = Auth::user();
+
+                    // Cek Izin Sakit hari ini
+                    $hasSakit = IzinSakit::where('user_id', $user->id)
+                                ->whereDate('tanggal', $today)
+                                ->exists();
+
+                    // Cek Cuti yang sudah approved dan periode-nya mencakup hari ini
+                    $hasCuti = Cuti::where('user_id', $user->id)
+                                ->where('status_cuti_id', '2')               // sesuaikan jika enum/numeric
+                                ->whereDate('tanggal_mulai', '<=', $today)
+                                ->whereDate('tanggal_akhir', '>=', $today)
+                                ->exists();
+
+                    // Jika salah satu true, tombol absensi disable
+                    $disableCreate = $currentHour >= 17| $hasSakit || $hasCuti;
+                @endphp
+
+                @if (have_permission('absensi_create'))
+                    <a 
+                        href="{{ route('absensi.create') }}"
+                        class="btn btn-primary btn-md float-right {{ $disableCreate ? 'disabled' : '' }}"
+                        @if($disableCreate)
+                            aria-disabled="true"
+                            onclick="return false;"
+                        @endif
+                    >
+                        <i class="fas fa-plus"></i>
+                    </a>
+                @endif
 
                 {{-- Tombol “Export Excel” hanya untuk role_id ≠ 3 --}}
                 @if (Auth::user()->role_id != 3)

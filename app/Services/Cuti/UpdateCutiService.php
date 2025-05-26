@@ -29,6 +29,8 @@ class UpdateCutiService extends DefaultService implements ServiceInterface
         $cuti->approve_by = $dto['approve_by'] ?? $cuti->approve_by;
         $cuti->reject_at = $dto['reject_at'] ?? $cuti->reject_at;
         $cuti->reject_by = $dto['reject_by'] ?? $cuti->reject_by;
+        $cuti->sisa_cuti = $dto ['sisa_cuti']?? $cuti->sisa_cuti;
+
 
         $this->prepareAuditUpdate($cuti);
         $cuti->save();

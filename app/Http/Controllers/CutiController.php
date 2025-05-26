@@ -24,27 +24,35 @@ use Illuminate\Support\Facades\Mail;
 
 class CutiController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        // Breadcrumb untuk view
         $breadcrumb = [
             ['link' => '/', 'name' => 'Dashboard'],
-            ['link' => '/cuti', 'name' => 'Cuti']
+            ['link' => '/cuti', 'name' => 'Cuti'],
         ];
 
-        $users = app('GetUserService')->execute([
-            'role_id_not_in' => [1]
-        ]);
+        // Ambil data pengguna dan status cuti
+        $users         = app('GetUserService')->execute(['role_id_not_in' => [1]]);
+        $status_cutis  = app('GetStatusCutiService')->execute([]);
+        // Panggil service Cuti untuk data dan sisa cuti
+        $cutiService   = app('GetCutiService')->execute(['role_id_not_in' => [1], 'with_pagination' => false]);
 
-        $status_cutis = app('GetStatusCutiService')->execute([]);
+        // Jika request AJAX, kembalikan JSON untuk DataTables
+        if ($request->ajax()) {
+            return response()->json([
+                'data' => $cutiService['data'],
+            ]);
+        }
 
+        // Render view biasa
         return view('cuti.index', [
-            'breadcrumb' => breadcrumb($breadcrumb),
-            'users' => $users['data'],
-            'sisa_cuti' => $users['data'],
-            'status_cutis' => $status_cutis['data']
+            'breadcrumb'   => breadcrumb($breadcrumb),
+            'users'        => $users['data'],
+            'cutis'        => $cutiService['data'],
+            'sisa_cuti'    => $cutiService['sisa_cuti'] ?? 0,
+            'status_cutis' => $status_cutis['data'],
         ]);
-
-        return view('errors.403');
     }
 
     public function create(Request $request)
@@ -106,7 +114,14 @@ public function store(Request $request)
         // Hitung total cuti
         $tanggalMulai = Carbon::parse($request->tanggal_mulai);
         $tanggalAkhir = Carbon::parse($request->tanggal_akhir);
-        $totalCuti = $tanggalMulai->diffInDays($tanggalAkhir) + 1;
+        $totalCuti = 0;
+        $current   = $tanggalMulai->copy();
+        while ($current->lte($tanggalAkhir)) {
+            if (! $current->isWeekend()) {
+                $totalCuti++;
+            }
+            $current->addDay();
+        }
         $sisaCutiBaru = max(0, $user->sisa_cuti);
 
         // Update kuota cuti
@@ -123,6 +138,7 @@ public function store(Request $request)
             'perihal' => $request->perihal,
             'keterangan' => $request->keterangan,
             'jenis_cuti' => $request->jenis_cuti,
+            'jumlah_cuti' => $totalCuti
         ];
 
         app('StoreCutiService')->execute($input_dto, true);
@@ -293,6 +309,7 @@ Log::info("Total cuti yang dihitung (tanpa Sabtu & Minggu): {$totalCuti}");
             'keterangan'      => $cuti->keterangan,
             'approve_at'      => now(),
             'approve_by'      => $user->id,
+            'sisa_cuti' => $sisaCutiBaru
         ];
 
         // 9. Update Cuti
@@ -482,9 +499,17 @@ public function tolak(Request $request, $cuti_uuid)
                 ])
 
                 ->addColumn('sisa_cuti', function ($row) {
-                    $sisaCuti = DB::table('users')->where('id', $row->user_id)->value('sisa_cuti');
-                    return $sisaCuti ?? '-';
+                    // $row->sisa_cuti berasal dari kolom cutis.sisa_cuti
+                    return $row->sisa_cuti ?? '-';
                 })
+
+                
+                ->addColumn('jumlah_cuti', function ($row) {
+                    // $row->sisa_cuti berasal dari kolom cutis.sisa_cuti
+                    return $row->jumlah_cuti ?? '-';
+                })
+                
+                
                 
                 ->rawColumns(['action', 'approval', 'tanggal_keputusan', 'pemberi_keputusan'])
                 ->editColumn('approval', function ($row){
