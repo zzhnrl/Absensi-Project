@@ -176,12 +176,18 @@ return [
         'permission_name' => 'Update',
     ],
     [
-        'module_name' => 'input lokasi',
+        'module_name' => 'Input lokasi',
         'permission_name' => 'View',
     ],
     // History Point User
-[
-    'module_name'     => 'History Point User',
-    'permission_name' => 'View',
-],
+    [
+        'module_name'     => 'History Point User',
+        'permission_name' => 'View',
+    ],
+
+    // Rekap Absen
+    [
+        'module_name'     => 'Rekap Absen',
+        'permission_name' => 'View',
+    ],
 ];

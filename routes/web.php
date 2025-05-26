@@ -172,6 +172,9 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('grid', [App\Http\Controllers\AbsensiController::class, 'grid'])->name('absensi.grid');
     });
 
+    Route::group(['prefix' => 'rekap_absen'], function () {
+        Route::get('grid', [App\Http\Controllers\RekapAbsenController::class, 'grid'])->name('rekap_absen.grid');
+    });
 
     Route::group(['prefix' => 'user'], function () {
         Route::get('grid', [App\Http\Controllers\UserController::class, 'grid'])->name('user.grid');
@@ -247,6 +250,12 @@ Route::resource('user', App\Http\Controllers\UserController::class, [
             'create' => 'absensi.create',
             'store' => 'absensi.store',
             'delete' => 'absensi.delete'
+        ],
+    ]);
+
+    Route::resource('rekap_absen', App\Http\Controllers\RekapAbsenController::class, [
+        'names' => [
+            'index' => 'rekap_absen',
         ],
     ]);
 
