@@ -33,7 +33,7 @@
                         @endforeach
                     </div>
                     <div class="col-4 col-md" style="align-content: center; text-align: center">
-                        <p>Total Karyawan </p>
+                        <p>Total User </p>
                         <h2><b>{{ $total_karyawan['jumlah_karyawan'] }}</b></h2>
                     </div>
                 </div>

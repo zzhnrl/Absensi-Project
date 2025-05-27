@@ -273,18 +273,14 @@ return [
             'text' => 'Absensi',
             'url'  => '/absensi',
             'icon' => 'fas fa-user-check',
-            'module_key' => [
-                'absensi_view',
-                'rekap_absen_view',
-            ],
-            'submenu' => [
-                [
-                    'text' => 'Rekap Absensi',
-                    'url'  => '/rekap_absen',
-                    'icon' => 'fa-solid fa-clipboard-user',
-                    'module_key' => 'rekap_absen_view',
-                ],
-            ],
+            'module_key' => 'absensi_view'
+        ],
+
+        [
+            'text' => 'Rekap Absensi',
+            'url'  => '/rekap_absen',
+            'icon' => 'fa-solid fa-address-book',
+            'module_key' => 'rekap_absen_view',
         ],
 
         [

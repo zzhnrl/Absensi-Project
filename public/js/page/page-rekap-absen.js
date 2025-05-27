@@ -38,19 +38,19 @@ $(function () {
         }).toString()
         datatableHandleFetchData({
             html: datatable,
-            url: '/rekap_absen/grid?' + query,
-            column: [
-                { title: "Bulan", data: 'bulan' },
-                { title: "Tahun", data: 'tahun' },
+            url: '/rekap_izin_sakit/grid?' + query,
+            columns: [
                 { title: "Nama Karyawan", data: 'nama_karyawan' },
-                { title: "Jumlah Izin Sakit", data: 'jumlah_izin_sakit' },
-            ]
+                { title: "WFO", data: 'WFO'},
+                { title: "WFH", data: 'WFH'},
+                { title: "Jumlah Poin", data: 'jumlah_point' },
+            ],
         }, false, false)
     }
 
     datatableHandleDelete({
         html: datatable,
-        url: '/rekap-absen/'
+        url: '/jumlah_izin_sakit/'
     })
 
 })

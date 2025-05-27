@@ -7,7 +7,7 @@
 
 @section('content')
 
-<div class="row">
+<!-- <div class="row">
     <div class="col-12">
         <div class="card">
             <div class='card-header'>
@@ -19,9 +19,9 @@
                 @endif
 
                 @if ($breadcrumb) {!! $breadcrumb !!} @endif
-                <!-- @if (have_permission('rekap_izin_sakit_create'))
+                @if (have_permission('rekap_izin_sakit_create'))
                 <a href="{{ route('rekap_izin_sakit.create') }}" class="btn btn-primary btn-md float-right"><i class="fas fa-plus"></i></a>
-                @endif -->
+                @endif
             </div>
             <br>
             <div class="card-body">
@@ -36,7 +36,47 @@
             </div>
         </div>
     </div>
-</div>
+</div> -->
+ <div class="row">
+    <div class="col-12 col-md">
+        <div class="card mx-auto card">
+            <div class="card-header">
+              <h3 class="card-title w-100">
+                <h3>Karyawan Teratas</h3>
+              </h3>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-12 col-md-3">
+                  <label>Bulan</label>
+                  <select id="top-employee-month" class="form-control top-employee-filter">
+                      @foreach (App\Helpers\DateTime::getArrayOfMonths() as $index => $month)
+                          <option value="{{ $month }}" @if ($month == now()->locale('id')->translatedFormat('F')) selected @endif>
+                              {{ $month }}
+                          </option>
+                      @endforeach
+                  </select>                
+                </div>
+                <div class="col-12 col-md-3">
+                    <label>Tahun</label>
+                    <select id="top-employee-year" class="form-control top-employee-filter">
+                        @for ($i=now()->format('Y');$i<=now()->addYears(5)->format('Y');$i++)
+                        <option value="{{ $i }}" @if ($i == (int) now()->format('Y')) selected @endif>{{ $i }}</option>
+                        @endfor
+                    </select>
+                </div>
+              </div>
+              <br>
+              <table id="datatable-top-employee" class="table table-md table-hover dt-responsive nowrap" width="100%">
+                <thead>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+  </div>
 @stop
 
 @section('css')
