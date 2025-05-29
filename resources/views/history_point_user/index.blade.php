@@ -1,45 +1,39 @@
 @extends('adminlte::page')
 
-@section('title', 'Riwayat Poin Saya')
+@section('title', 'Point User')
 
 @section('content_header')
-    <h1>Riwayat Poin Saya</h1>
 @stop
+
 
 @section('content')
 <div class="card">
+<div class='card-header'>
+                @if ($breadcrumb) {!! $breadcrumb !!} @endif
+
+
+                
+            </div>
     <div class="card-body table-responsive">
-        <table class="table table-bordered table-hover">
-            <thead class="thead-dark">
+        <table id="datatable" class="table table-bordered table-hover dt-responsive nowrap" width="100%">
+            <thead>
                 <tr>
-                    <th>#</th>
+                    <th>No</th>
                     <th>Perubahan Poin</th>
                     <th>Total Poin</th>
                     <th>Tanggal</th>
                 </tr>
             </thead>
-            <tbody>
-                @forelse($history as $item)
-                <tr>
-                    <td>{{ $loop->iteration }}</td>
-                    <td>{{ $item->perubahan_point }}</td>
-                    <td>{{ $item->jumlah_point }}</td>
-                    <td>
-    {{ $item->tanggal
-        ? $item->tanggal->format('d/m/Y')
-        : '-' 
-    }}
-</td>
-
-
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="4" class="text-center">Belum ada riwayat poin</td>
-                </tr>
-                @endforelse
-            </tbody>
+            <tbody></tbody>
         </table>
     </div>
 </div>
+@stop
+
+@section('js')
+<script>
+  // Kirim URL grid ke JS
+  window.HISTORY_POINT_GRID_URL = "{{ route('history-point.grid') }}";
+</script>
+<script type="module" src="{{ asset('js/page/page-history-point.js') }}"></script>
 @stop

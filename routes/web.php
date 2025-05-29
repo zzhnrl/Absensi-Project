@@ -6,6 +6,7 @@ use App\Exports\RekapIzinSakitExport;
 use App\Exports\UserExport;
 use App\Http\Controllers\HistoryPointUserController;
 use App\Http\Controllers\OfficeLocationController;
+use App\Http\Controllers\RekapAbsenController;
 use App\Http\Controllers\UserController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
@@ -253,11 +254,14 @@ Route::resource('user', App\Http\Controllers\UserController::class, [
         ],
     ]);
 
-    Route::resource('rekap_absen', App\Http\Controllers\RekapAbsenController::class, [
-        'names' => [
-            'index' => 'rekap_absen',
-        ],
-    ]);
+    Route::get('rekap-absen', [RekapAbsenController::class, 'index'])
+    ->middleware('auth')
+    ->name('rekap-absen.index');
+
+// Endpoint JSON untuk DataTables
+Route::get('rekap-absen/data', [RekapAbsenController::class, 'data'])
+    ->middleware('auth')
+    ->name('rekap-absen.data');
 
     Route::resource('point_user', App\Http\Controllers\PointUserController::class, [
         'names' => [
@@ -341,4 +345,7 @@ Route::get('/rekap-izin-sakit/export', function () {
 Route::middleware('auth')->group(function () {
     Route::get('/history-point', [HistoryPointUserController::class, 'index'])
          ->name('history-point.index');
+
+    Route::get('/history-point/grid', [HistoryPointUserController::class, 'grid'])
+         ->name('history-point.grid');
 });

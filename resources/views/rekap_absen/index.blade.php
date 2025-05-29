@@ -1,71 +1,55 @@
 @extends('adminlte::page')
 
-@section('title', 'Rekap Absen')
+@section('title', 'Rekap Absensi')
 
 @section('content_header')
+    <h1>Rekap Absensi</h1>
 @stop
 
 @section('content')
+<div class="card">
+  <div class="card-header">
+    @if($breadcrumb) {!! $breadcrumb !!} @endif
 
-<div class="row" style="font-size: 15pt">
-    <div class="col-12">
-        <div class="card">
-            <div class='card-header'>
-                @if ($breadcrumb) {!! $breadcrumb !!} @endif
-                @if (have_permission('user_create'))
-                <a href="{{ route('user.create') }}" class="btn btn-primary btn-md float-right"><i class="fas fa-plus"></i></a>
-                @endif
-                {{-- Tombol “Export Excel” hanya untuk role_id ≠ 3 --}}
-                @if (Auth::user()->role_id != 3)
-                <a href="{{ route('user.export') }}" class="btn btn-success btn-md float-right mr-2">
-                    <i class="fas fa-file-excel"></i> Export Excel
-                </a>
-                @endif
-
-            </div>
-            <br>
-            <div class="card-body">
-              <div class="row">
-                <div class="col-12 col-md-3">
-                  <label>Bulan</label>
-                  <select id="top-employee-month" class="form-control top-employee-filter">
-                      @foreach (App\Helpers\DateTime::getArrayOfMonths() as $index => $month)
-                          <option value="{{ $month }}" @if ($month == now()->locale('id')->translatedFormat('F')) selected @endif>
-                              {{ $month }}
-                          </option>
-                      @endforeach
-                  </select>                
-                </div>
-                <div class="col-12 col-md-3">
-                    <label>Tahun</label>
-                    <select id="top-employee-year" class="form-control top-employee-filter">
-                        @for ($i=now()->format('Y');$i<=now()->addYears(5)->format('Y');$i++)
-                        <option value="{{ $i }}" @if ($i == (int) now()->format('Y')) selected @endif>{{ $i }}</option>
-                        @endfor
-                    </select>
-                </div>
-              </div>
-              <br>
-              <table id="datatable-top-employee" class="table table-md table-hover dt-responsive nowrap" width="100%">
-                <thead>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-            </div>
-        </div>
+    <div class="row mt-2">
+      <div class="col-md-3">
+        <select id="month-filter" class="form-control">
+          <option value="">-- Bulan --</option>
+          @foreach(\App\Helpers\DateTime::getArrayOfMonths() as $m)
+            <option value="{{ $m }}">{{ $m }}</option>
+          @endforeach
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select id="year-filter" class="form-control">
+          <option value="">-- Tahun --</option>
+          @for($y = now()->year; $y >= now()->year - 5; $y--)
+            <option value="{{ $y }}">{{ $y }}</option>
+          @endfor
+        </select>
+      </div>
     </div>
+  </div>
+
+  <div class="card-body">
+    <table id="datatable" class="table table-bordered table-hover dt-responsive nowrap">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Karyawan</th>
+          <th>WFO</th>
+          <th>WFH</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 </div>
 @stop
 
-@section('css')
-<style>
-    table {
-        font-size: 18pt
-    }
-</style>
-@stop
-
 @section('js')
-    <script src="{{ asset('js/page/page-rekap-absen.js') }}" type="module"></script>
+<script>
+  window.REKAP_ABSEN_DATA_URL = "{{ route('rekap-absen.data') }}";
+</script>
+<script src="{{ asset('js/page/page-rekap-absen.js') }}" type="module"></script>
 @stop

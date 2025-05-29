@@ -278,7 +278,7 @@ return [
 
         [
             'text' => 'Rekap Absensi',
-            'url'  => '/rekap_absen',
+            'url'  => '/rekap-absen',
             'icon' => 'fa-solid fa-address-book',
             'module_key' => 'rekap_absen_view',
         ],

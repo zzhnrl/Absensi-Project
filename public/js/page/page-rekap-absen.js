@@ -1,56 +1,27 @@
-import { datatableHandleFetchData, datatableHandleDelete } from "/js/helper/datatable.js"
-$(function () {
-    'use strict';
-    //init variable
-    const datatable = $('#datatable')
-    const karyawan_filter = $('#karyawan-filter')
-    const group_filter = $('.group-filter')
-    const rekap_izin_sakit_month = $('#rekap-izin-sakit-month')
-    const rekap_izin_sakit_year = $('#rekap-izin-sakit-year')
+import { datatableHandleFetchData } from "/js/helper/datatable.js";
 
-    fetchData()
+$(function(){
+  const table = $('#datatable');
 
-    group_filter.on('change', function(e) {
-        e.preventDefault();
-        fetchData();
-    });
+  function loadTable(){
+    const month = $('#month-filter').val();
+    const year  = $('#year-filter').val();
+    const params = new URLSearchParams({ month, year }).toString();
 
-    rekap_izin_sakit_month.on('change', function (e) {
-        e.preventDefault()
-        fetchData()
-    })
+    datatableHandleFetchData({
+      html: table,
+      url: window.REKAP_ABSEN_DATA_URL + '?' + params,
+      column: [
+        { title:"No",       data:'DT_RowIndex',    orderable:false, searchable:false },
+        { title:"Karyawan", data:'nama_karyawan'                   },
+        { title:"WFO",      data:'WFO'                            },
+        { title:"WFH",      data:'WFH'                            },
+      ],
+      searching: false
+    }, false, false);
+  }
 
-    rekap_izin_sakit_year.on('change', function (e) {
-        e.preventDefault()
-        fetchData()
-    })
+  $('#month-filter, #year-filter').on('change', loadTable);
 
-    karyawan_filter.on('change', function(e) {
-        e.preventDefault();
-        fetchData();
-    });
-    
-    function fetchData() {
-        let query = new URLSearchParams({
-            month: rekap_izin_sakit_month.val(),
-            year: rekap_izin_sakit_year.val(),
-            user_uuid: karyawan_filter.val(),
-        }).toString()
-        datatableHandleFetchData({
-            html: datatable,
-            url: '/rekap_izin_sakit/grid?' + query,
-            columns: [
-                { title: "Nama Karyawan", data: 'nama_karyawan' },
-                { title: "WFO", data: 'WFO'},
-                { title: "WFH", data: 'WFH'},
-                { title: "Jumlah Poin", data: 'jumlah_point' },
-            ],
-        }, false, false)
-    }
-
-    datatableHandleDelete({
-        html: datatable,
-        url: '/jumlah_izin_sakit/'
-    })
-
-})
+  loadTable(); // initial load
+});

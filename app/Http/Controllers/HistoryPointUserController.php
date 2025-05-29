@@ -5,16 +5,36 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\HistoryPointUser;
+use Yajra\DataTables\Facades\DataTables;
 
 class HistoryPointUserController extends Controller
 {
     public function index()
     {
-        // Ambil semua riwayat poin milik user yang sedang login
-        $history = HistoryPointUser::where('user_id', Auth::id())
-                                   ->orderBy('created_at', 'desc')
-                                   ->get();
+        // Susun breadcrumb
+        $breadcrumb = [
+            ['link' => '/',            'name' => 'Dashboard'],
+            ['link' => '/history-point','name' => 'Riwayat Poin Saya'],
+        ];
 
-        return view('history_point_user.index', compact('history'));
+        return view('history_point_user.index', [
+            'breadcrumb' => breadcrumb($breadcrumb),
+        ]);
+    }
+
+    public function grid(Request $request)
+    {
+
+
+        $query = HistoryPointUser::where('user_id', Auth::id());
+
+        return DataTables::of($query)
+            ->addIndexColumn()
+            ->editColumn('tanggal', function($row) {
+                return $row->tanggal
+                    ? $row->tanggal->format('d/m/Y')
+                    : '-';
+            })
+            ->toJson();  // ->make(true) juga bisa
     }
 }
