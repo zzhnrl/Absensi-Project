@@ -3,7 +3,7 @@
 @section('title', 'Rekap Absensi')
 
 @section('content_header')
-    <h1>Rekap Absensi</h1>
+    <!-- <h1>Rekap Absensi</h1> -->
 @stop
 
 @section('content')
