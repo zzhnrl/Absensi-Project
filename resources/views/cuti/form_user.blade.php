@@ -84,7 +84,7 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    // inisialisasi Flatpickr
+    // Inisialisasi Flatpickr
     const mulaiPicker = flatpickr("#tanggal_mulai", {
         dateFormat: "Y-m-d", defaultDate: "today", allowInput: true
     });
@@ -94,41 +94,83 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelector("#tanggal_mulai + .input-group-append").addEventListener("click", () => mulaiPicker.open());
     document.querySelector("#tanggal_akhir + .input-group-append").addEventListener("click", () => akhirPicker.open());
 
-    // hitung total cuti (hanya hari Senin–Jumat)
-    function hitungCuti() {
-        const startVal = document.getElementById("tanggal_mulai").value;
-        const endVal   = document.getElementById("tanggal_akhir").value;
-        const start    = new Date(startVal);
-        const end      = new Date(endVal);
-        let totalDays  = 0;
+    // Cache tanggal merah supaya gak fetch berulang
+    let tanggalMerahCache = null;
 
-        if (!isNaN(start) && !isNaN(end) && end >= start) {
-            // loop dari start hingga end
-            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-                const day = d.getDay();
-                // 0 = Minggu, 6 = Sabtu
-                if (day !== 0 && day !== 6) {
-                    totalDays++;
-                }
+    async function fetchTanggalMerah() {
+        if (tanggalMerahCache) return tanggalMerahCache;
+
+        try {
+            const res = await fetch('https://api-harilibur.vercel.app/api');
+            if (!res.ok) throw new Error('Gagal fetch tanggal merah');
+
+            const data = await res.json();
+
+            // Ambil tanggal merah dalam format YYYY-MM-DD array
+            tanggalMerahCache = data.map(d => d.holiday_date);
+            
+            // Bisa tambah cuti bersama manual jika perlu
+            // tanggalMerahCache.push('2025-05-30');
+
+            return tanggalMerahCache;
+        } catch (e) {
+            console.error(e);
+            // Kalau error, anggap tidak ada tanggal merah agar tidak blocking
+            return [];
+        }
+    }
+
+    async function hitungCuti() {
+        const startVal = document.getElementById("tanggal_mulai").value;
+        const endVal = document.getElementById("tanggal_akhir").value;
+        const totalCutiInput = document.getElementById("total_cuti");
+        const totalCutiHidden = document.getElementById("total_cuti_hidden");
+
+        if (!startVal || !endVal) {
+            totalCutiInput.value = 0;
+            totalCutiHidden.value = 0;
+            return;
+        }
+
+        const start = new Date(startVal);
+        const end = new Date(endVal);
+
+        if (isNaN(start) || isNaN(end) || end < start) {
+            totalCutiInput.value = 0;
+            totalCutiHidden.value = 0;
+            return;
+        }
+
+        const tanggalMerah = await fetchTanggalMerah();
+
+        let totalDays = 0;
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+            const day = d.getDay(); // 0 Minggu, 6 Sabtu
+            const dateString = d.toISOString().slice(0, 10);
+
+            if (day !== 0 && day !== 6 && !tanggalMerah.includes(dateString)) {
+                totalDays++;
             }
         }
 
-        document.getElementById("total_cuti").value        = totalDays;
-        document.getElementById("total_cuti_hidden").value = totalDays;
+        totalCutiInput.value = totalDays;
+        totalCutiHidden.value = totalDays;
     }
 
     document.getElementById("tanggal_mulai").addEventListener("change", hitungCuti);
     document.getElementById("tanggal_akhir").addEventListener("change", hitungCuti);
-    // hitung sekali saat load
+
+    // Hitung sekali saat load (kalau ada default tanggal)
     hitungCuti();
 
-    // show/hide kuota cuti untuk jenis "tahunan"
+    // Show/hide kuota cuti untuk jenis "tahunan"
     const jenisSelect = document.getElementById("jenis_cuti");
-    const kuotaGroup  = document.getElementById("kuota_cuti_group");
-    jenisSelect.addEventListener("change", function(){
+    const kuotaGroup = document.getElementById("kuota_cuti_group");
+    jenisSelect.addEventListener("change", function () {
         kuotaGroup.style.display = (this.value === "tahunan") ? "" : "none";
     });
 });
 </script>
+
 
  

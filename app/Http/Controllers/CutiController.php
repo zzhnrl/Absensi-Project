@@ -19,6 +19,7 @@ use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -84,93 +85,152 @@ class CutiController extends Controller
 
 
 
-public function store(Request $request)
+
+     public function store(Request $request)
+     {
+         DB::beginTransaction();
+         try {
+             // Ambil user sesuai user_uuid di request, atau fallback ke user login
+             if ($request->has('user_uuid') && !empty($request->user_uuid)) {
+                 $user = app('GetUserService')->execute([
+                     'user_uuid' => $request->user_uuid,
+                 ])['data'];
+             } else {
+                 $user = app('GetUserService')->execute([
+                     'user_uuid' => auth()->user()->uuid,
+                 ])['data'];
+             }
+     
+             Log::info("User UUID yang digunakan untuk proses cuti:", ['used_user_uuid' => $user->uuid]);
+     
+             // Validasi sisa cuti
+             if ((int)$user->sisa_cuti <= 0) {
+                 abort(403, 'Sisa cuti Anda sudah habis. Pengajuan cuti tidak diizinkan.');
+             }
+     
+             // Fungsi hitung hari cuti dengan cek hari libur nasional dan weekend
+             $totalCuti = $this->hitungHariCuti($request->tanggal_mulai, $request->tanggal_akhir);
+     
+             // Kurangi sisa cuti user
+             $sisaCutiBaru = max(0, $user->sisa_cuti - $totalCuti);
+     
+
+     
+             // Simpan data cuti
+             $input_dto = [
+                 'status_cuti_id' => 1,
+                 'user_uuid' => $user->uuid,
+                 'user_id' => $user->id,
+                 'nama_karyawan' => $request->nama_karyawan,
+                 'tanggal_mulai' => $request->tanggal_mulai,
+                 'tanggal_akhir' => $request->tanggal_akhir,
+                 'perihal' => $request->perihal,
+                 'keterangan' => $request->keterangan,
+                 'jenis_cuti' => $request->jenis_cuti,
+                 'jumlah_cuti' => $totalCuti
+             ];
+     
+             app('StoreCutiService')->execute($input_dto, true);
+     
+             // Kirim email notifikasi ke role 1 dan 2
+             $emailsRole1 = DB::table('users')->where('role_id', 1)->pluck('email')->toArray();
+             $emailsRole2 = DB::table('users')->where('role_id', 2)->pluck('email')->toArray();
+             $recipients = array_unique(array_merge($emailsRole1, $emailsRole2));
+     
+             try {
+                 Mail::to($recipients)->send(new \App\Mail\CutiNotification($input_dto));
+                 Log::info('Email notifikasi cuti berhasil dikirim ke role 1 dan 2.', ['emails' => $recipients]);
+             } catch (\Exception $emailEx) {
+                 Log::error('Gagal mengirim email notifikasi cuti.', [
+                     'error' => $emailEx->getMessage(),
+                     'emails' => $recipients
+                 ]);
+             }
+     
+             DB::commit();
+             return redirect()->route('cuti')->with('success', 'Cuti berhasil diajukan dan notifikasi dikirim ke admin');
+     
+         } catch (\Exception $ex) {
+             DB::rollback();
+             Log::error('Gagal menyimpan data cuti.', ['error' => $ex->getMessage()]);
+             return redirect()->back()->withInput()->with('danger', $ex->getMessage());
+         }
+     }
+     
+     /**
+      * Hitung hari cuti, exclude weekend dan hari libur nasional dari API
+      */
+      private function hitungHariCuti($tanggal_mulai, $tanggal_selesai)
+      {
+          $response = Http::get('https://api-harilibur.vercel.app/api');
+      
+          if (!$response->successful()) {
+              throw new \Exception('Gagal mengambil data hari libur nasional.');
+          }
+      
+          $hari_libur = collect($response->json())
+              ->map(fn($item) => Carbon::parse($item['holiday_date'])->toDateString())
+              ->toArray();
+      
+          Log::info('Daftar hari libur nasional:', $hari_libur);
+      
+          $mulai = Carbon::parse($tanggal_mulai);
+          $selesai = Carbon::parse($tanggal_selesai);
+          $jumlah_hari = 0;
+      
+          while ($mulai <= $selesai) {
+              $tanggal = $mulai->toDateString();
+              $isWeekend = $mulai->isWeekend();
+              $isHariLibur = in_array($tanggal, $hari_libur);
+      
+              Log::info("Cek tanggal: $tanggal | Weekend: " . ($isWeekend ? 'YA' : 'TIDAK') . " | Hari Libur: " . ($isHariLibur ? 'YA' : 'TIDAK'));
+      
+              if (!$isWeekend && !$isHariLibur) {
+                  $jumlah_hari++;
+                  Log::info("Tanggal $tanggal dihitung sebagai hari cuti.");
+              } else {
+                  Log::info("Tanggal $tanggal TIDAK dihitung sebagai hari cuti.");
+              }
+      
+              $mulai->addDay();
+          }
+      
+          Log::info("Total hari cuti yang dihitung: $jumlah_hari");
+      
+          return $jumlah_hari;
+      }
+
+
+      public function hitungCuti(Request $request)
 {
-    DB::beginTransaction();
-    try {
-        
-        // Kalau request bawa user_uuid, gunakan itu. Kalau tidak, fallback ke user yang login
-        if ($request->has('user_uuid') && !empty($request->user_uuid)) {
-            $user = app('GetUserService')->execute([
-                'user_uuid' => $request->user_uuid,
-            ])['data'];
-        } else {
-            $user = app('GetUserService')->execute([
-                'user_uuid' => auth()->user()->uuid,
-            ])['data'];
+    $tanggalMulai = Carbon::parse($request->tanggal_mulai);
+    $tanggalAkhir = Carbon::parse($request->tanggal_akhir);
+
+    // Ambil hari libur nasional dari API
+    $response = Http::get('https://api-harilibur.vercel.app/api');
+    $hariLibur = collect($response->json())->pluck('holiday_date')->toArray();
+
+    
+
+    $hariLibur = array_merge($hariLibur);
+
+    $totalCuti = 0;
+    $current = $tanggalMulai->copy();
+
+    while ($current->lte($tanggalAkhir)) {
+        $isWeekend = $current->isWeekend();
+        $isHariLibur = in_array($current->toDateString(), $hariLibur);
+
+        if (!$isWeekend && !$isHariLibur) {
+            $totalCuti++;
         }
 
-
-        Log::info("User UUID yang digunakan untuk proses cuti:", ['used_user_uuid' => $user->uuid]);
-
-        // ⛔ VALIDASI: ambil sisa cuti dari database, BUKAN dari form
-        if ((int)$user->sisa_cuti <= 0) {
-            abort(403, 'Sisa cuti Anda sudah habis. Pengajuan cuti tidak diizinkan.');
-        }
-
-        Log::info('Request user_uuid dari frontend:', ['user_uuid' => $request->user_uuid]);
-
-
-        // Hitung total cuti
-        $tanggalMulai = Carbon::parse($request->tanggal_mulai);
-        $tanggalAkhir = Carbon::parse($request->tanggal_akhir);
-        $totalCuti = 0;
-        $current   = $tanggalMulai->copy();
-        while ($current->lte($tanggalAkhir)) {
-            if (! $current->isWeekend()) {
-                $totalCuti++;
-            }
-            $current->addDay();
-        }
-        $sisaCutiBaru = max(0, $user->sisa_cuti);
-
-        // Update kuota cuti
-        DB::table('users')->where('uuid', $user->uuid)->update(['sisa_cuti' => $sisaCutiBaru]);
-
-        // Simpan data cuti
-        $input_dto = [
-            'status_cuti_id' => 1,
-            'user_uuid' => $user->uuid,
-            'user_id' => $user->id,
-            'nama_karyawan' => $request->nama_karyawan,
-            'tanggal_mulai' => $request->tanggal_mulai,
-            'tanggal_akhir' => $request->tanggal_akhir,
-            'perihal' => $request->perihal,
-            'keterangan' => $request->keterangan,
-            'jenis_cuti' => $request->jenis_cuti,
-            'jumlah_cuti' => $totalCuti
-        ];
-
-        app('StoreCutiService')->execute($input_dto, true);
-
-        // Kirim email ke semua admin (role_id = 1)
-        // Kirim email ke semua user dengan role_id = 1 dan 2
-        $emailsRole1 = DB::table('users')->where('role_id', 1)->pluck('email')->toArray();
-        $emailsRole2 = DB::table('users')->where('role_id', 2)->pluck('email')->toArray();
-        $recipients = array_unique(array_merge($emailsRole1, $emailsRole2));
-
-
-
-        try {
-            Mail::to($recipients)->send(new CutiNotification($input_dto));
-            Log::info('Email notifikasi cuti berhasil dikirim ke role 1 dan 2.', ['emails' => $recipients]);
-        } catch (\Exception $emailEx) {
-            Log::error('Gagal mengirim email notifikasi cuti.', [
-                'error' => $emailEx->getMessage(),
-                'emails' => $recipients
-            ]);
-        }
-
-        DB::commit();
-        return redirect()->route('cuti')->with('success', 'Cuti berhasil diajukan dan notifikasi dikirim ke admin');
-
-    } catch (\Exception $ex) {
-        DB::rollback();
-        Log::error('Gagal menyimpan data cuti.', ['error' => $ex->getMessage()]);
-        return redirect()->back()->withInput()->with('danger', $ex->getMessage());
+        $current->addDay();
     }
-}
 
+    return response()->json(['total_cuti' => $totalCuti]);
+}
+      
 
 
     public function edit($uuid)
@@ -287,17 +347,20 @@ Log::info("Total cuti yang dihitung (tanpa Sabtu & Minggu): {$totalCuti}");
         Log::info("Jenis cuti: {$cuti->jenis_cuti}");
 
         // 7. Update sisa_cuti hanya jika jenis_cuti = 'tahunan'
+        $sisaCutiBaru = $karyawan->sisa_cuti; // default nilai sebelum cek jenis cuti
+
         if ($cuti->jenis_cuti === 'tahunan') {
             $sisaCutiBaru = max(0, $karyawan->sisa_cuti - $totalCuti);
-
+        
             DB::table('users')
                 ->where('id', $karyawan->id)
                 ->update(['sisa_cuti' => $sisaCutiBaru]);
-
+        
             Log::info("Kuota cuti karyawan ID {$karyawan->id} dikurangi menjadi {$sisaCutiBaru}");
         } else {
             Log::info("Jenis cuti bukan tahunan ({$cuti->jenis_cuti}), kuota cuti tidak dikurangi.");
         }
+        
 
         // 8. Prepare DTO untuk update status cuti
         $input_dto = [

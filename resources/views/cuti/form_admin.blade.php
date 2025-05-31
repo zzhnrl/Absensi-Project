@@ -1,49 +1,71 @@
-<style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Form Cuti</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
     .form-control {
         text-align: center;
     }
     textarea.text-center::placeholder {
         text-align: center;
     }
-</style>
+    </style>
+</head>
+<body>
 
 <div class="row">
     <div class="col-12">
         <div class="form-group">
             <label class="w-100">Tanggal Mulai Cuti</label>
-            <input type="date" name="tanggal_mulai" id="tanggal_mulai" class="form-control">
+            <div class="input-with-icon">
+                <input type="date" name="tanggal_mulai" id="tanggal_mulai" class="form-control">
+                <span class="icon-calendar" onclick="document.getElementById('tanggal_mulai').showPicker?.() || document.getElementById('tanggal_mulai').focus()">
+                    
+                </span>
+            </div>
         </div>
 
         <div class="form-group">
             <label class="w-100">Tanggal Akhir Cuti</label>
-            <input type="date" name="tanggal_akhir" id="tanggal_akhir" class="form-control">
+            <div class="input-with-icon">
+                <input type="date" name="tanggal_akhir" id="tanggal_akhir" class="form-control">
+                <span class="icon-calendar" onclick="document.getElementById('tanggal_akhir').showPicker?.() || document.getElementById('tanggal_akhir').focus()">
+                    
+                </span>
+            </div>
         </div>
 
         <label class="w-100">Nama Karyawan</label>
         <div class="form-group text-center">
-            <select class="select2 form-control text-center" name="user_uuid" id="user_uuid">
-                <option value="">-- Pilih Nama Karyawan --</option>
-                @foreach ($users as $user)
-                    <option value="{{ $user->uuid }}" name="user_uuid">{{ $user->userInformation->nama }}</option>
-                @endforeach
-            </select>
+        <select class="select2 form-control text-center" name="user_uuid" id="user_uuid">
+    <option value="">-- Pilih Nama Karyawan --</option>
+    @foreach ($users as $user)
+        <option 
+            value="{{ $user->uuid }}" 
+            data-sisa_cuti="{{ $user->sisa_cuti }}"
+        >
+            {{ $user->userInformation->nama }}
+        </option>
+    @endforeach
+</select>
+
         </div>
 
         <input type="hidden" name="nama_karyawan" id="nama_karyawan">
 
-        {{-- Jenis Cuti --}}
-<div class="form-group">
-    <label>Jenis Cuti</label>
-    <select name="jenis_cuti" id="jenis_cuti" class="form-control" required>
-        <option value="">-- Pilih Jenis Cuti --</option>
-        <option value="tahunan">Cuti Tahunan</option>
-        <!-- <option value="sakit">Cuti Sakit</option> -->
-        <option value="alasan_penting">Cuti Karena Alasan Penting</option>
-        <option value="besar">Cuti Besar</option>
-        <option value="melahirkan">Cuti Melahirkan</option>
-        <option value="diluar_tanggungan">Cuti Diluar Tanggungan Negara</option>
-    </select>
-</div>
+        <div class="form-group">
+            <label >Jenis Cuti</label>
+            <select class="form-control" name="jenis_cuti" id="jenis_cuti" required>
+                <option value="">-- Pilih Jenis Cuti --</option>
+                <option value="tahunan">Cuti Tahunan</option>
+                <option value="alasan_penting">Cuti Karena Alasan Penting</option>
+                <option value="besar">Cuti Besar</option>
+                <option value="melahirkan">Cuti Melahirkan</option>
+                <option value="diluar_tanggungan">Cuti Diluar Tanggungan Negara</option>
+            </select>
+        </div>
 
         <div class="form-group">
             <label>Total Cuti</label>
@@ -52,9 +74,10 @@
         </div>
 
         <div class="form-group">
-            <label class="w-100">Sisa Cuti</label>
-            <input type="text" id="sisa_cuti" class="form-control" readonly>
-        </div>
+    <label class="w-100">Sisa Cuti</label>
+    <input type="text" id="sisa_cuti" class="form-control" readonly>
+</div>
+
 
         <div class="form-group">
             <label class="w-100">Keterangan</label>
@@ -64,69 +87,92 @@
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
 <script>
-    $(document).ready(function () {
-        // === SET TANGGAL REALTIME SECARA EXPLICIT ===
-        function setTodayAsDefault() {
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            const mm = String(today.getMonth() + 1).padStart(2, '0');
-            const dd = String(today.getDate()).padStart(2, '0');
-            const todayFormatted = `${yyyy}-${mm}-${dd}`;
+$(document).ready(function () {
+    $('#user_uuid').select2();
 
-            $('#tanggal_mulai').val(todayFormatted);
-            $('#tanggal_akhir').val(todayFormatted);
+    const tanggalMulai = document.getElementById("tanggal_mulai");
+    const tanggalAkhir = document.getElementById("tanggal_akhir");
+    const totalCutiInput = document.getElementById("total_cuti");
+    const totalCutiHidden = document.getElementById("total_cuti_hidden");
+    const sisaCutiInput = $('#sisa_cuti');
+    const namaKaryawanInput = $('#nama_karyawan');
+
+    let tanggalMerahCache = null;
+
+    async function fetchTanggalMerah() {
+        if (tanggalMerahCache) return tanggalMerahCache;
+
+        try {
+            const res = await fetch("https://api-harilibur.vercel.app/api");
+            if (!res.ok) throw new Error("Gagal fetch tanggal merah");
+
+            const data = await res.json();
+            tanggalMerahCache = data.map(d => d.holiday_date);
+            return tanggalMerahCache;
+        } catch (e) {
+            console.error(e);
+            return [];
+        }
+    }
+
+    async function hitungCuti() {
+        const startVal = tanggalMulai.value;
+        const endVal = tanggalAkhir.value;
+
+        if (!startVal || !endVal) {
+            totalCutiInput.value = 0;
+            totalCutiHidden.value = 0;
+            return;
         }
 
-        setTodayAsDefault(); // Set saat pertama kali buka
+        const start = new Date(startVal);
+        const end = new Date(endVal);
 
-        // === HITUNG TOTAL CUTI ===
-        function hitungTotalCuti() {
-            const tglMulai = new Date($('#tanggal_mulai').val());
-            const tglAkhir = new Date($('#tanggal_akhir').val());
+        if (isNaN(start) || isNaN(end) || end < start) {
+            totalCutiInput.value = 0;
+            totalCutiHidden.value = 0;
+            return;
+        }
 
-            if (!isNaN(tglMulai) && !isNaN(tglAkhir)) {
-                let totalHari = (tglAkhir - tglMulai) / (1000 * 60 * 60 * 24) + 1;
-                totalHari = totalHari > 0 ? totalHari : 1;
+        const tanggalMerah = await fetchTanggalMerah();
 
-                $('#total_cuti').val(totalHari);
-                $('#total_cuti_hidden').val(totalHari);
-            } else {
-                $('#total_cuti').val('');
-                $('#total_cuti_hidden').val('');
+        let totalDays = 0;
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+            const day = d.getDay();
+            const dateString = d.toISOString().slice(0, 10);
+
+            if (day !== 0 && day !== 6 && !tanggalMerah.includes(dateString)) {
+                totalDays++;
             }
         }
 
-        $('#tanggal_mulai, #tanggal_akhir').change(hitungTotalCuti);
+        totalCutiInput.value = totalDays;
+        totalCutiHidden.value = totalDays;
+    }
 
-        // === GET SISA CUTI ===
-        $('#user_uuid').change(function () {
-            const nama = $(this).find(':selected').text();
-            $('#nama_karyawan').val(nama);
+    tanggalMulai.addEventListener("change", hitungCuti);
+    tanggalAkhir.addEventListener("change", hitungCuti);
 
-            const uuid = $(this).val();
-            if (uuid) {
-                $.ajax({
-                    url: '/get-sisa-cuti/' + uuid,
-                    type: 'GET',
-                    success: function (res) {
-                        $('#sisa_cuti').val(res.sisa_cuti);
-                    },
-                    error: function () {
-                        $('#sisa_cuti').val('Gagal ambil data');
-                    }
-                });
-            } else {
-                $('#sisa_cuti').val('');
-            }
-        });
+    // Gunakan jQuery event handler untuk select2
+    $('#user_uuid').on('change', function () {
+        const selectedOption = this.options[this.selectedIndex];
+        const sisaCuti = selectedOption.getAttribute("data-sisa_cuti") || 0;
+        sisaCutiInput.val(sisaCuti);
 
-        $('form').submit(function () {
-            $('#nama_karyawan').val($('#user_uuid').find(':selected').text());
-            $('#total_cuti_hidden').val($('#total_cuti').val());
-        });
-
-        hitungTotalCuti(); // Hitung awal
+        const namaKaryawan = selectedOption.textContent.trim();
+        namaKaryawanInput.val(namaKaryawan);
     });
+
+    hitungCuti();
+
+    if ($('#user_uuid').val() !== "") {
+        $('#user_uuid').trigger('change');
+    }
+});
+
+
 </script>
+
+</body>
+</html>

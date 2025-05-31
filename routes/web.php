@@ -4,6 +4,7 @@ use App\Exports\AbsensiExport;
 use App\Exports\CutiExport;
 use App\Exports\RekapIzinSakitExport;
 use App\Exports\UserExport;
+use App\Http\Controllers\CutiController;
 use App\Http\Controllers\HistoryPointUserController;
 use App\Http\Controllers\OfficeLocationController;
 use App\Http\Controllers\RekapAbsenController;
@@ -349,3 +350,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/history-point/grid', [HistoryPointUserController::class, 'grid'])
          ->name('history-point.grid');
 });
+
+
+
+// routes/web.php
+Route::post('/cuti/hitung', [CutiController::class, 'hitungCuti'])->name('cuti.hitung');
