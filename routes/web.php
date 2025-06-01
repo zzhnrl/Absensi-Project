@@ -355,3 +355,5 @@ Route::middleware('auth')->group(function () {
 
 // routes/web.php
 Route::post('/cuti/hitung', [CutiController::class, 'hitungCuti'])->name('cuti.hitung');
+
+

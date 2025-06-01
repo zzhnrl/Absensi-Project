@@ -44,6 +44,7 @@
 
                 @if (have_permission('izin_sakit_create'))
                     <a 
+                        id="btn-absen"
                         href="{{ route('izin_sakit.create') }}"
                         class="btn btn-primary btn-md float-right {{ $disableCreate ? 'disabled' : '' }}"
                         @if($disableCreate)
@@ -84,5 +85,40 @@
 @stop
 
 @section('js')
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const btnAbsen = document.getElementById('btn-absen');
+        const today = new Date();
+        const isoToday = today.toISOString().split('T')[0];
+        const dayOfWeek = today.getDay(); // 0 = Minggu, 6 = Sabtu
+
+        // Disable jika weekend (Sabtu/Minggu)
+        if (dayOfWeek === 0 || dayOfWeek === 6) {
+            disableButtonAbsen();
+        } else {
+            // Jika bukan weekend, cek hari libur nasional via API
+            fetch('https://api-harilibur.vercel.app/api')
+                .then(response => response.json())
+                .then(data => {
+                    const isHoliday = data.some(item => item.holiday_date === isoToday);
+                    if (isHoliday) {
+                        disableButtonAbsen();
+                    }
+                })
+                .catch(error => {
+                    console.error('Gagal cek hari libur nasional:', error);
+                });
+        }
+
+        function disableButtonAbsen() {
+            if (btnAbsen) {
+                btnAbsen.classList.add('disabled');
+                btnAbsen.setAttribute('aria-disabled', 'true');
+                btnAbsen.onclick = () => false;
+            }
+        }
+    });
+</script>
+
 <script src="{{ asset('js/page/page-izin-sakit.js') }}" type="module"></script>
 @stop
