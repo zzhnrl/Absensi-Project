@@ -8,6 +8,9 @@ $(function(){
     const year  = $('#year-filter').val();
     const params = new URLSearchParams({ month, year }).toString();
 
+    console.log('Filter bulan:', month, 'tahun:', year);
+
+
     datatableHandleFetchData({
       html: table,
       url: window.REKAP_ABSEN_DATA_URL + '?' + params,

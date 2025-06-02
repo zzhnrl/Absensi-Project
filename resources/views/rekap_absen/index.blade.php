@@ -13,12 +13,16 @@
 
     <div class="row mt-2">
       <div class="col-md-3">
-        <select id="month-filter" class="form-control">
-          <option value="">-- Bulan --</option>
-          @foreach(\App\Helpers\DateTime::getArrayOfMonths() as $m)
-            <option value="{{ $m }}">{{ $m }}</option>
-          @endforeach
-        </select>
+      <select id="month-filter" class="form-control">
+  <option value="">-- Month --</option>
+  @foreach([
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ] as $m)
+    <option value="{{ $m }}">{{ $m }}</option>
+  @endforeach
+</select>
+
       </div>
       <div class="col-md-3">
         <select id="year-filter" class="form-control">
