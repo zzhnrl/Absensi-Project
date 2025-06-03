@@ -1,18 +1,35 @@
-// public/js/page/page-history-point.js
 import { datatableHandleFetchData } from "/js/helper/datatable.js";
+
+let tableInstance;
 
 $(function () {
     const datatable = $('#datatable');
 
-    datatableHandleFetchData({
-        html: datatable,
-        url: window.HISTORY_POINT_GRID_URL,
-        column: [
-            { title: "No",             data: 'DT_RowIndex',    orderable: false, searchable: false },
-            { title: "Perubahan Poin",  data: 'perubahan_point' },
-            { title: "Total Poin",      data: 'jumlah_point' },
-            { title: "Tanggal",         data: 'tanggal'        },
-        ],
-        searching: false
-    }, false, false);
+    const getUrlWithParams = () => {
+        const month = $('#month').val();
+        const year = $('#year').val();
+        const url = new URL(window.HISTORY_POINT_GRID_URL, window.location.origin);
+        url.searchParams.set('month', month);
+        url.searchParams.set('year', year);
+        return url.toString();
+    };
+
+    // Inisialisasi datatable pertama kali
+    tableInstance = datatable.DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: getUrlWithParams(),
+        columns: [
+            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+            { data: 'perubahan_point', name: 'perubahan_point' },
+            { data: 'jumlah_point', name: 'jumlah_point' },
+            { data: 'tanggal', name: 'tanggal' }
+        ]
+    });
+
+    // Saat form filter disubmit
+    $('#filter-form').on('submit', function (e) {
+        e.preventDefault();
+        tableInstance.ajax.url(getUrlWithParams()).load();  // Ganti URL dan reload data
+    });
 });

@@ -6,6 +6,7 @@
             <span class="text-danger">{{$message}}</span> 
         @enderror
         <img id="preview-image" src="{{ (isset($user) and isset($user->photo)) ? $user->photo->url : asset('img/no_picture.png') }}" alt="your image" width="50%" />
+        <small class="form-text text-muted">*Tidak Ada Maksimal Size dan File wajib PNG atau JPG</small> <!-- ini tambahan teksnya -->.
         @if(isset($user) && isset($user->photo))
             <div class="form-check mt-2">
                 <input class="form-check-input" type="checkbox" id="remove-picture" name="remove_picture" value="{{ $user->photo->id }}">
@@ -21,6 +22,7 @@
             <span class="text-danger">{{ $message }}</span> 
         @enderror
         <img id="preview-images" src="{{ (isset($user) and isset($user->signatureFile)) ? $user->signatureFile->url : asset('img/no_picture.png') }}" alt="your image" width="50%" />
+        <small class="form-text text-muted">*Tidak Ada Maksimal Size dan File wajib PNG atau JPG</small> <!-- ini tambahan teksnya -->
         @if(isset($user) && isset($user->signatureFile))
             <div class="form-check mt-2">
                 <input class="form-check-input" type="checkbox" id="remove-picture" name="remove_picture" value="{{ $user->signatureFile->id }}"/>

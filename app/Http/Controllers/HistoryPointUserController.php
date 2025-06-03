@@ -22,19 +22,22 @@ class HistoryPointUserController extends Controller
         ]);
     }
 
+    
+
     public function grid(Request $request)
     {
-
-
         $query = HistoryPointUser::where('user_id', Auth::id());
-
+    
+        if ($request->filled('month') && $request->filled('year')) {
+            $query->whereMonth('tanggal', $request->month)
+                  ->whereYear('tanggal', $request->year);
+        }
+    
         return DataTables::of($query)
             ->addIndexColumn()
-            ->editColumn('tanggal', function($row) {
-                return $row->tanggal
-                    ? $row->tanggal->format('d/m/Y')
-                    : '-';
+            ->editColumn('tanggal', function ($row) {
+                return $row->tanggal ? $row->tanggal->format('d/m/Y') : '-';
             })
-            ->toJson();  // ->make(true) juga bisa
+            ->toJson(); // atau ->make(true);
     }
 }

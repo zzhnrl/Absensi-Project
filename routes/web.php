@@ -2,6 +2,7 @@
 
 use App\Exports\AbsensiExport;
 use App\Exports\CutiExport;
+use App\Exports\HistoryPointExport;
 use App\Exports\RekapIzinSakitExport;
 use App\Exports\UserExport;
 use App\Http\Controllers\CutiController;
@@ -356,4 +357,10 @@ Route::middleware('auth')->group(function () {
 // routes/web.php
 Route::post('/cuti/hitung', [CutiController::class, 'hitungCuti'])->name('cuti.hitung');
 
+Route::get('/export-history-point', function () {
+    $month = request('month');
+    $year = request('year');
+
+    return Excel::download(new HistoryPointExport($month, $year), 'history-point.xlsx');
+})->name('history-point.export');
 

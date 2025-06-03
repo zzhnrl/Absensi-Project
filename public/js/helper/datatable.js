@@ -38,6 +38,7 @@ export function datatableHandleFetchData ({html, url, column,columnDefs=null, se
         columns: column,
         columnDefs: columnDefs
     });
+    return table; // <- ini penting
 }
 
 export function datatableHandleEvent ({html, onEvent, classEvent, triggerEvent}) {

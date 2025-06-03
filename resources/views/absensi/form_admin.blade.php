@@ -96,6 +96,7 @@
         accept="image/*" 
         class="form-control @error('bukti_foto_dikantor') is-invalid @enderror"
       >
+      <small class="form-text text-muted">*Tidak Ada Maksimal Size dan File wajib PNG atau JPG</small> <!-- ini tambahan teksnya -->
       @error('bukti_foto_dikantor')
         <span class="text-danger">{{ $message }}</span>
       @enderror
