@@ -25,7 +25,7 @@ class GetAbsensiService extends DefaultService implements ServiceInterface
         if (isset($dto['search_param']) and $dto['search_param'] != null) {
             $model->where(function ($q) use ($dto) {
                 $q->where('nama', 'ILIKE', '%' . $dto['search_param'] . '%')
-                    ->orwhere('kategori', 'ILIKE', '%' . $dto['search_param'] . '%');
+                ->orwhere('nama_kategori', 'ILIKE', '%' . $dto['search_param'] . '%');
             });
         }
 
