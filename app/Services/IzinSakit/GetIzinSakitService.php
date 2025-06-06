@@ -67,6 +67,12 @@ class GetIzinSakitService extends DefaultService implements ServiceInterface
             }
         }
 
+        if (isset($dto['search_param']) and $dto['search_param'] != null) {
+            $model->where(function ($q) use ($dto) {
+                $q->where('nama_karyawan', 'ILIKE', '%' . $dto['search_param'] . '%');
+            });
+        }
+
         // 5) Handle detail vs list
         if (!empty($dto['izin_sakit_uuid'])) {
             // detail single record

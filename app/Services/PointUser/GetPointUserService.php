@@ -24,7 +24,8 @@ class GetPointUserService extends DefaultService implements ServiceInterface
 
         if (isset($dto['search_param']) and $dto['search_param'] != null) {
             $model->where(function ($q) use ($dto) {
-                $q->where('bulan', 'ILIKE', '%' . $dto['search_param'] . '%');
+                $q->where('bulan', 'ILIKE', '%' . $dto['search_param'] . '%')
+                ->orwhere('nama_karyawan', 'ILIKE', '%' . $dto['search_param'] . '%');
             });
         }
 
