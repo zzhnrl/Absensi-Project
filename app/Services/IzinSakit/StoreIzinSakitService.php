@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\DefaultService;
 use App\Services\ServiceInterface;
 use App\Rules\ExistsUuid;
+use App\Rules\MaxFileSize;
 
 class StoreIzinSakitService extends DefaultService implements ServiceInterface
 {
@@ -56,7 +57,7 @@ class StoreIzinSakitService extends DefaultService implements ServiceInterface
     public function rules($dto)
     {
         return [
-            'photo_uuid' => ['required', 'uuid', new ExistsUuid('file_storages')],
+            'photo_uuid' => ['required', 'uuid', new ExistsUuid('file_storages'), new MaxFileSize(10)],
             'user_uuid' => ['required', 'uuid', new ExistsUuid('users')],
             'nama_karyawan' => ['required'],
             'tanggal' => ['required'],

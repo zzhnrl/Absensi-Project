@@ -243,12 +243,18 @@ foreach ($adminUsers as $admin) {
                 'error'           => 'Forbidden',
             ], 403);
         }
+    
         try {
             $approved_role_all = [1,2];
             $user_ids = in_array(auth()->user()->userRole->role_id, $approved_role_all)
-            ? User::pluck('id')->toArray()
-            : [auth()->user()->id];
-
+                ? User::pluck('id')->toArray()
+                : [auth()->user()->id];
+    
+            // Ambil filter dari query params
+            $month = $request->query('month');
+            $year = $request->query('year');
+            $user_uuid = $request->query('user_uuid');
+    
             $request->merge([
                 'per_page' => $request->length,
                 'page' => $request->start / $request->length + 1,
@@ -256,39 +262,81 @@ foreach ($adminUsers as $admin) {
                 'search_param' => $request->search['value'],
                 'user_id_in' => $user_ids
             ]);
-
-            $izin_sakit = app('GetIzinSakitService')->execute($request->all());
-
-            return datatables($izin_sakit['data'])->skipPaging()
+    
+            // Build query manual (bisa juga dimasukkan ke service)
+            $query = IzinSakit::query();
+    
+            // Filter user berdasarkan UUID kalau ada
+            if ($user_uuid) {
+                $user = User::where('uuid', $user_uuid)->first();
+                if ($user) {
+                    $query->where('user_id', $user->id);
+                }
+            } else {
+                // Filter hanya untuk user yang boleh lihat data
+                $query->whereIn('user_id', $user_ids);
+            }
+    
+            // Filter bulan
+            if ($month) {
+                $query->whereMonth('tanggal', $month);
+            }
+    
+            // Filter tahun
+            if ($year) {
+                $query->whereYear('tanggal', $year);
+            }
+    
+            // Tambahkan pagination, search, dan sorting jika perlu
+            // Contoh sederhana pagination manual:
+            $total = $query->count();
+    
+            if ($request->per_page) {
+                $query->skip(($request->page - 1) * $request->per_page)
+                      ->take($request->per_page);
+            }
+    
+            $izin_sakit = $query->get();
+    
+            return datatables($izin_sakit)
+                ->skipPaging()
                 ->with([
-                    "recordsTotal"    => $izin_sakit['pagination']['total_data'],
-                    "recordsFiltered" => $izin_sakit['pagination']['total_data'],
+                    "recordsTotal"    => $total,
+                    "recordsFiltered" => $total,
                 ])
                 ->rawColumns(['action', 'pbukti'])
                 ->addColumn('pbukti', function ($row) {
-                    return (isset($row->photo_id)) ?
-                        "<img src='" . $row->photo->generateUrl()->url . "' width='100px' />"
-                        :
-                        "<img src='img/no_picture.png' width='100px' />";
+                    if (isset($row->photo_id)) {
+                        return $row->photo->generateUrl()->url;  // kirim URL murni
+                    }
+                    return asset('img/no_picture.png'); // kirim URL default
                 })
-
+                
+                ->addColumn('nama_karyawan', function($row) {
+                    return $row->user->userInformation->nama ?? '-';
+                })
                 ->addColumn('action', function ($row) {
                     if (!empty($row->id)) {
                         $action = [];
-                        (have_permission('izin_sakit_delete')) ? array_push($action, "<button value='$row->uuid' class='delete dropdown-item font-action' >Delete</button>") : null;
+                        (have_permission('izin_sakit_delete')) ? array_push($action, "<button value='$row->uuid' class='delete dropdown-item font-action'>Delete</button>") : null;
                         return generate_action_button($action);
                     }
                 })
                 ->toJson();
-            } catch (\Throwable $e) {
-                // 4) Tangkap semua error dan kembalikan JSON 500
-                Log::error('IzinSakit grid error: '.$e->getMessage());
-                return response()->json([
-                    'data'            => [],
-                    'recordsTotal'    => 0,
-                    'recordsFiltered' => 0,
-                    'error'           => $e->getMessage(),
-                ], 500);
-            }
+
+                Log::info('Filter month: ' . $month);
+                Log::info('Filter year: ' . $year);
+                Log::info('Filter user_uuid: ' . $user_uuid);
+    
+        } catch (\Throwable $e) {
+            Log::error('IzinSakit grid error: '.$e->getMessage());
+            return response()->json([
+                'data'            => [],
+                'recordsTotal'    => 0,
+                'recordsFiltered' => 0,
+                'error'           => $e->getMessage(),
+            ], 500);
         }
+    }
+    
 }

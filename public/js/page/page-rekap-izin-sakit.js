@@ -1,56 +1,53 @@
-import { datatableHandleFetchData, datatableHandleDelete } from "/js/helper/datatable.js"
-$(function () {
-    'use strict';
-    //init variable
-    const datatable = $('#datatable')
-    const karyawan_filter = $('#karyawan-filter')
-    const group_filter = $('.group-filter')
-    const rekap_izin_sakit_month = $('#rekap-izin-sakit-month')
-    const rekap_izin_sakit_year = $('#rekap-izin-sakit-year')
+$(document).ready(function() {
+    const datatable = $('#datatable');
+    const filterSelectors = '#rekap-izin-sakit-month, #rekap-izin-sakit-year, #karyawan-filter';
 
-    fetchData()
-
-    group_filter.on('change', function(e) {
-        e.preventDefault();
-        fetchData();
-    });
-
-    rekap_izin_sakit_month.on('change', function (e) {
-        e.preventDefault()
-        fetchData()
-    })
-
-    rekap_izin_sakit_year.on('change', function (e) {
-        e.preventDefault()
-        fetchData()
-    })
-
-    karyawan_filter.on('change', function(e) {
-        e.preventDefault();
-        fetchData();
-    });
-    
     function fetchData() {
-        let query = new URLSearchParams({
-            month: rekap_izin_sakit_month.val(),
-            year: rekap_izin_sakit_year.val(),
-            user_uuid: karyawan_filter.val(),
-        }).toString()
-        datatableHandleFetchData({
-            html: datatable,
-            url: '/rekap_izin_sakit/grid?' + query,
-            column: [
-                { title: "Bulan", data: 'bulan' },
-                { title: "Tahun", data: 'tahun' },
-                { title: "Nama Karyawan", data: 'nama_karyawan' },
-                { title: "Jumlah Izin Sakit", data: 'jumlah_izin_sakit' },
-            ]
-        }, false, false)
+        // Ambil nilai filter
+        let month = $('#rekap-izin-sakit-month').val();
+        let year = $('#rekap-izin-sakit-year').val();
+        let user_uuid = $('#karyawan-filter').val();
+
+        let query = new URLSearchParams({ month, year, user_uuid }).toString();
+
+        // Jika DataTable sudah aktif, destroy dulu supaya tidak dobel
+        if ($.fn.DataTable.isDataTable(datatable)) {
+            datatable.DataTable().clear().destroy();
+        }
+
+        // Inisialisasi DataTable baru
+        datatable.DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '/rekap_izin_sakit/grid?' + query,
+                type: 'GET',
+                error: function(xhr, status, error) {
+                    console.error('Error fetching data:', error);
+                    console.error(xhr.responseText);
+                }
+            },
+            columns: [
+                { data: 'bulan', title: 'Bulan' },
+                { data: 'tahun', title: 'Tahun' },
+                { data: 'nama_karyawan', title: 'Nama Karyawan' },
+                { data: 'jumlah_izin_sakit', title: 'Jumlah Izin Sakit' }
+            ],
+            lengthChange: false,
+            pageLength: 10,
+            responsive: true,
+            autoWidth: false,
+            language: {
+                emptyTable: "Data tidak ditemukan"
+            }
+        });
     }
 
-    datatableHandleDelete({
-        html: datatable,
-        url: '/jumlah_izin_sakit/'
-    })
+    // Pasang event change untuk semua filter sekaligus
+    $(filterSelectors).on('change', function() {
+        fetchData();
+    });
 
-})
+    // Load data pertama kali
+    fetchData();
+});

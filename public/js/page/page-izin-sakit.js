@@ -1,48 +1,92 @@
-import { datatableHandleFetchData, datatableHandleDelete } from "/js/helper/datatable.js"
-$(function () {
-    'use strict';
-    //init variable
-    const datatable = $('#datatable')
-    const group_filter = $('.group-filter')
-    const izin_sakit_date_filter = $('#izin-sakit-date-filter')
-    const karyawan_filter = $('#karyawan-filter')
+// file: izin_sakit.js
+import { datatableHandleFetchData, datatableHandleDelete } from "/js/helper/datatable.js";
 
-    fetchData()
+$(document).ready(function () {
+    const datatable = $('#datatable');
 
-    group_filter.on('change', function(e) {
+    function fetchData() {
+        let month = $('#rekap-izin-sakit-month').val();
+        let year = $('#rekap-izin-sakit-year').val();
+        let user_uuid = $('#karyawan-filter').val();
+
+        let query = new URLSearchParams({ month, year, user_uuid }).toString();
+        let ajaxUrl = '/izin_sakit/grid?' + query;
+
+        if ($.fn.DataTable.isDataTable(datatable)) {
+            datatable.DataTable().clear().destroy();
+        }
+
+        datatable.DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: ajaxUrl,
+                type: 'GET',
+                error: function(xhr, status, error) {
+                    console.error('Error fetching data:', error);
+                    console.error(xhr.responseText);
+                }
+            },
+            columns: [
+                { data: 'tanggal', title: 'Tanggal' },
+                { 
+                    data: 'pbukti', 
+                    title: 'Foto Bukti',
+                    render: function(data) {
+                        if (!data) return '-';
+                        return `<img src="${data}" alt="Bukti" style="max-width: 120px; max-height: 80px; object-fit: contain; border-radius: 4px; box-shadow: 0 0 5px rgba(0,0,0,0.1);" />`;
+                    },
+                    orderable: false,
+                    searchable: false,
+                    width: '15%'
+                },
+                { data: 'nama_karyawan', title: 'Nama Karyawan' },
+                { data: 'keterangan', title: 'Keterangan' },
+                { 
+                    title: "Created At",
+                    data: 'created_at',
+                    defaultContent: '-',
+                    render: function (data) {
+                        if (!data) return '-';
+            
+                        if (!isNaN(data) && String(data).length <= 11) {
+                            return moment.unix(data).format("DD/MM/YYYY HH:mm:ss");
+                        }
+            
+                        const parsed = moment(data, 'YYYY-MM-DD HH:mm:ss', true);
+                        return parsed.isValid() ? parsed.format("DD/MM/YYYY HH:mm:ss") : '-';
+                    }
+                },
+                { 
+                    data: 'action', 
+                    title: 'Action', 
+                    orderable: false, 
+                    searchable: false,
+                    className: 'text-center',
+                    width: '10%'
+                }
+            ],
+            language: {
+                emptyTable: "Data tidak ditemukan"
+            },
+            lengthChange: false,
+            pageLength: 10,
+            responsive: true,
+            autoWidth: false
+        });
+    }
+
+    // Load data pertama kali
+    fetchData();
+
+    // Event klik tombol filter
+    $('#btn-filter').on('click', function(e) {
         e.preventDefault();
         fetchData();
     });
 
-    izin_sakit_date_filter.on('change', function (e) {
-        e.preventDefault()
-        fetchData()
-    })
-
-    function fetchData() {
-        let query = new URLSearchParams({
-            date_range : izin_sakit_date_filter.val(),
-            user_uuid : karyawan_filter.val()
-        }).toString()
-        datatableHandleFetchData({
-            html: datatable,
-            url: '/izin_sakit/grid?' + query,
-            column: [
-                { title: "Tanggal", data: 'tanggal' },
-                { width: "15%", title: "Foto Bukti", data: 'pbukti' },
-                { title: "Nama Karyawan", data: 'nama_karyawan' },
-                { title: "Keterangan", data: 'keterangan' },
-            ],
-            error(xhr, status, err) {
-                console.error('Izin Sakit Ajax Error:', status, err);
-                console.error('Response Text:', xhr.responseText);
-            }
-        })
-    }
-
-    datatableHandleDelete({
-        html: datatable,
-        url: '/izin_sakit/'
-    })
-
-})
+    // Auto fetch saat filter berubah
+    $('.rekap-izin-sakit-filter').on('change', function() {
+        fetchData();
+    });
+});

@@ -19,25 +19,57 @@ use Illuminate\Support\Facades\Log;
 
 class AbsensiController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $breadcrumb = [
             ['link' => '/', 'name' => 'Dashboard'],
             ['link' => '/absensi', 'name' => 'Absensi']
         ];
-
+    
+        // Ambil data absensi berdasarkan filter
+        $query = \App\Models\Absensi::query();
+    
+        // Filter tanggal
+        if ($request->filled('date_range')) {
+            $range = explode(' to ', $request->date_range);
+            if (count($range) === 2) {
+                $start = Carbon::parse($range[0])->startOfDay();
+                $end = Carbon::parse($range[1])->endOfDay();
+                $query->whereBetween('tanggal', [$start, $end]);
+            }
+        }
+    
+        // Filter karyawan
+        if ($request->filled('karyawan_filter')) {
+            $userId = User::where('uuid', $request->karyawan_filter)->value('id');
+            if ($userId) {
+                $query->where('user_id', $userId);
+            } else {
+                // UUID tidak ditemukan → kosongkan hasil
+                $query->whereNull('user_id');
+            }
+        }
+    
+        // Filter kategori absensi
+        if ($request->filled('kategori_filter')) {
+            $query->where('nama_kategori', $request->kategori_filter);
+        }
+        
+    
+        $absensis = $query->latest()->get();
+    
         $kategori_absensis = app('GetKategoriAbsensiService')->execute([]);
         $users = app('GetUserService')->execute([
             'role_id_not_in' => [1]
         ]);
-
+    
         return view('absensi.index', [
             'breadcrumb' => breadcrumb($breadcrumb),
             'kategori_absensis' => $kategori_absensis['data'],
-            'users' => $users['data']
+            'users' => $users['data'],
+            'absensis' => $absensis,
+            'filter' => $request->all() // untuk mengisi ulang input saat reload
         ]);
-
-        return view('errors.403');
     }
 
     public function create(Request $request) 
@@ -189,7 +221,7 @@ public function store(Request $request)
 
         $request->validate([
     // …
-    'bukti_foto_dikantor' => 'nullable|image|max:2048',
+    'bukti_foto_dikantor' => 'nullable|image|max:10240',
 ]);
 
 if ($request->hasFile('bukti_foto_dikantor')) {

@@ -28,8 +28,13 @@ class GetIzinSakitService extends DefaultService implements ServiceInterface
 
         // 3) Search & filters
         if (!empty($dto['search_param'])) {
-            $query->where('nama', 'ILIKE', '%'.$dto['search_param'].'%');
+            $keyword = $dto['search_param'];
+            $query->where(function ($q) use ($keyword) {
+                $q->where('nama_karyawan', 'ILIKE', '%' . $keyword . '%')
+                  ->orWhere('keterangan', 'ILIKE', '%' . $keyword . '%');
+            });
         }
+        
 
         if (!empty($dto['user_id_in'])) {
             $query->whereIn('user_id', $dto['user_id_in']);
@@ -67,11 +72,7 @@ class GetIzinSakitService extends DefaultService implements ServiceInterface
             }
         }
 
-        if (isset($dto['search_param']) and $dto['search_param'] != null) {
-            $model->where(function ($q) use ($dto) {
-                $q->where('nama_karyawan', 'ILIKE', '%' . $dto['search_param'] . '%');
-            });
-        }
+
 
         // 5) Handle detail vs list
         if (!empty($dto['izin_sakit_uuid'])) {

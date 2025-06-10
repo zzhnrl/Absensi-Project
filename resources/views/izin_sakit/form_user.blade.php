@@ -4,7 +4,7 @@
         <input type="file" id="upload-image" name='imagess' class="form-control @error('image') is-invalid @enderror" />
         @error('image')<span class="text-danger">{{$message}}</span> @enderror
         <img id="preview-image" src="{{ (isset($user) and isset($user->photo)) ? $user->photo->url : asset('img/no_picture.png') }}" alt="your image" width="100%" />
-        <small class="form-text text-muted">*Tidak Ada Maksimal Size dan File wajib PNG atau JPG</small> <!-- ini tambahan teksnya -->
+        <small class="form-text text-muted">*Maks 10 Mb dan File wajib PNG atau JPG</small> <!-- ini tambahan teksnya -->
         @if(isset($user) && isset($user->photo))
         <div class="form-check mt-2">
             <input class="form-check-input" type="checkbox" id="remove-picture" name="remove_picture" value="{{ $user->photo->id }}">

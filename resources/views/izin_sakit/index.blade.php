@@ -66,7 +66,7 @@
 
             <br>
             <div class="card-body">
-                @include('rekap_izin_sakit.filter')
+                @include('izin_sakit.filter')
                 <br>
                 <table id="datatable" class="table table-md table-hover dt-responsive nowrap" width="100%">
                     <thead class="thead-primary"></thead>

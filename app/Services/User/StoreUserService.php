@@ -7,6 +7,7 @@ use App\Services\DefaultService;
 use App\Services\ServiceInterface;
 use App\Models\User;
 use App\Rules\ExistsUuid;
+use App\Rules\MaxFileSize;
 use App\Rules\UniqueData;
 use Illuminate\Support\Facades\Crypt;
 
@@ -58,7 +59,7 @@ class StoreUserService extends DefaultService implements ServiceInterface
     public function rules($dto)
     {
         return [
-            'photo_uuid' => ['required', 'uuid', new ExistsUuid('file_storages')],
+            'photo_uuid' => ['required', 'uuid', new ExistsUuid('file_storages'), new MaxFileSize(10)],
             'email' => ['required', 'string', new UniqueData('users', 'email')],
             'password' => ['required', 'string', 'min:8'],
         ];

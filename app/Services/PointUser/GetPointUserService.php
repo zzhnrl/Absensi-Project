@@ -54,7 +54,8 @@ class GetPointUserService extends DefaultService implements ServiceInterface
                 $this->results['pagination'] = $this->paginationDetail($dto['per_page'], $dto['page'], $model->count());
                 $model = $this->paginateData($model, $dto['per_page'], $dto['page']);
             }
-            $data = $model->get();
+
+        $data = $model;
         }
 
         $this->results['message'] = "Point user successfully fetched";

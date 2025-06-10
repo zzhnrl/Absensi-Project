@@ -34,7 +34,7 @@
                                 ->exists();
 
                     // Jika salah satu true, tombol absensi disable
-                    $disableCreate = $currentHour >= 17| $hasSakit || $hasCuti;
+                    $disableCreate = ($currentHour >= 17) || $hasSakit || $hasCuti;
                 @endphp
 
                 @if (have_permission('absensi_create'))
@@ -84,38 +84,38 @@
 
 @section('js')
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const btnAbsen = document.getElementById('btn-absen');
-        const today = new Date();
-        const isoToday = today.toISOString().split('T')[0];
-        const dayOfWeek = today.getDay(); // 0 = Minggu, 6 = Sabtu
+document.addEventListener("DOMContentLoaded", function () {
+    const btnAbsen = document.getElementById('btn-absen');
+    const today = new Date();
+    const isoToday = today.toISOString().split('T')[0];
+    const dayOfWeek = today.getDay(); // 0 = Minggu, 6 = Sabtu
 
-        // Disable jika weekend (Sabtu/Minggu)
-        if (dayOfWeek === 0 || dayOfWeek === 6) {
-            disableButtonAbsen();
-        } else {
-            // Jika bukan weekend, cek hari libur nasional via API
-            fetch('https://api-harilibur.vercel.app/api')
-                .then(response => response.json())
-                .then(data => {
-                    const isHoliday = data.some(item => item.holiday_date === isoToday);
-                    if (isHoliday) {
-                        disableButtonAbsen();
-                    }
-                })
-                .catch(error => {
-                    console.error('Gagal cek hari libur nasional:', error);
-                });
-        }
+    // Disable jika weekend (Sabtu/Minggu)
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+        disableButtonAbsen();
+    } else {
+        // Jika bukan weekend, cek hari libur nasional via API alternatif
+        fetch('https://api-harilibur.com/v1/holidays')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Response hari libur:', data);
+                const isHoliday = data.some(item => item.date === isoToday);
+                if (isHoliday) disableButtonAbsen();
+            })
+            .catch(error => console.error(error));
+    }
 
-        function disableButtonAbsen() {
-            if (btnAbsen) {
-                btnAbsen.classList.add('disabled');
-                btnAbsen.setAttribute('aria-disabled', 'true');
-                btnAbsen.onclick = () => false;
-            }
+    function disableButtonAbsen() {
+        if (btnAbsen) {
+            btnAbsen.classList.add('disabled');
+            btnAbsen.setAttribute('aria-disabled', 'true');
+            btnAbsen.onclick = () => false;
         }
-    });
+    }
+
+    console.log('Tanggal hari ini:', isoToday);
+});
+
 </script>
 
 <script src="{{ asset('js/page/page-absensi.js') }}" type="module"></script>
