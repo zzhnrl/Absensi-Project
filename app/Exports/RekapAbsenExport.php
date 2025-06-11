@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\RekapAbsen;
+use App\Models\Absensi;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -11,16 +11,16 @@ class RekapAbsenExport implements FromCollection, WithMapping, WithHeadings
 {
     public function collection()
     {
-        return RekapAbsen::whereNull('deleted_at')->get();
+        return Absensi::whereNull('deleted_at')->get();
     }
 
-    public function map($rekapabsen): array
+    public function map($absensi): array
     {
         return [
-            $rekapabsen->uuid,
-            $rekapabsen->nama_karyawan,
-            $rekapabsen->wfo,
-            $rekapabsen->wfh,
+            $absensi->uuid,
+            $absensi->nama_karyawan,
+            $absensi->nama_kategori === 'WFO' ? 'WFO' : '',
+            $absensi->nama_kategori === 'WFH' ? 'WFH' : '',
             $absensi->jumlah_point,
         ];
     }
@@ -36,4 +36,3 @@ class RekapAbsenExport implements FromCollection, WithMapping, WithHeadings
         ];
     }
 }
-
