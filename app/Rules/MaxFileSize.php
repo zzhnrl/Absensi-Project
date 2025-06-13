@@ -7,28 +7,29 @@ use App\Models\FileStorage;
 
 class MaxFileSize implements Rule
 {
-    protected $maxSize; // bytes
-    protected $message;
+    protected $maxSizeMB;
 
-    public function __construct($maxSizeInMB)
+    public function __construct($maxSizeMB)
     {
-        $this->maxSize = $maxSizeInMB * 1024 * 1024;
-        $this->message = "Ukuran file maksimal adalah {$maxSizeInMB} MB.";
+        $this->maxSizeMB = $maxSizeMB;
     }
 
     public function passes($attribute, $value)
     {
+        // Cek apakah UUID valid dan file-nya ditemukan
         $file = FileStorage::where('uuid', $value)->first();
-        if (!$file) {
-            $this->message = "File tidak ditemukan.";
+        if (!$file || !$file->size) {
             return false;
         }
 
-        return $file->size <= $this->maxSize;
+        // Hitung ukuran dalam MB
+        $fileSizeInMB = $file->size / 1024 / 1024;
+
+        return $fileSizeInMB <= $this->maxSizeMB;
     }
 
     public function message()
     {
-        return $this->message;
+        return "Ukuran file tidak boleh lebih dari {$this->maxSizeMB} MB.";
     }
 }

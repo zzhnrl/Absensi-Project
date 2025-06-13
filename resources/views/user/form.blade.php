@@ -1,12 +1,17 @@
 <div class="row p-2">
+    <!-- Foto Profil -->
     <div class="col-12 col-md-4">
         <label for="upload-image">Foto Profil</label>
-        <input type="file" id="upload-image" name='image' class="form-control @error('image') is-invalid @enderror" />
+        <input type="file" id="upload-image" name='image' class="form-control @error('image') is-invalid @enderror" required/>
         @error('image')
             <span class="text-danger">{{$message}}</span> 
         @enderror
-        <img id="preview-image" src="{{ (isset($user) and isset($user->photo)) ? $user->photo->url : asset('img/no_picture.png') }}" alt="your image" width="50%" />
-        <small class="form-text text-muted">*Maks 10 Mb dan File wajib PNG atau JPG</small> <!-- ini tambahan teksnya -->.
+        <img id="preview-image"
+             src="{{ (isset($user) and isset($user->photo)) ? $user->photo->url : asset('img/no_picture.png') }}"
+             data-default="{{ (isset($user) and isset($user->photo)) ? $user->photo->url : asset('img/no_picture.png') }}"
+             alt="your image" width="50%" />
+        <small class="form-text text-muted">*Maks 10 Mb dan File wajib PNG atau JPG</small>
+
         @if(isset($user) && isset($user->photo))
             <div class="form-check mt-2">
                 <input class="form-check-input" type="checkbox" id="remove-picture" name="remove_picture" value="{{ $user->photo->id }}">
@@ -15,18 +20,23 @@
         @endif
     </div>
 
+    <!-- Tanda Tangan -->
     <div class="col-12 col-md-4">
-        <label for="upload-image">Tanda Tangan</label>
-        <input type="file" id="upload-images" name='images' class="form-control @error('images') is-invalid @enderror" />
+        <label for="upload-signature">Tanda Tangan</label>
+        <input type="file" id="upload-signature" name='images' class="form-control @error('images') is-invalid @enderror" required/>
         @error('images') 
             <span class="text-danger">{{ $message }}</span> 
         @enderror
-        <img id="preview-images" src="{{ (isset($user) and isset($user->signatureFile)) ? $user->signatureFile->url : asset('img/no_picture.png') }}" alt="your image" width="50%" />
-        <small class="form-text text-muted">*Maks 10 Mb dan File wajib PNG atau JPG</small> <!-- ini tambahan teksnya -->
+        <img id="preview-signature"
+             src="{{ (isset($user) and isset($user->signatureFile)) ? $user->signatureFile->url : asset('img/no_picture.png') }}"
+             data-default="{{ (isset($user) and isset($user->signatureFile)) ? $user->signatureFile->url : asset('img/no_picture.png') }}"
+             alt="your image" width="50%" />
+        <small class="form-text text-muted">*Maks 10 Mb dan File wajib PNG atau JPG</small>
+
         @if(isset($user) && isset($user->signatureFile))
             <div class="form-check mt-2">
-                <input class="form-check-input" type="checkbox" id="remove-picture" name="remove_picture" value="{{ $user->signatureFile->id }}"/>
-                <label class="form-check-label" for="remove-picture">Hapus Tanda Tangan</label>
+                <input class="form-check-input" type="checkbox" id="remove-signature" name="remove_signature" value="{{ $user->signatureFile->id }}"/>
+                <label class="form-check-label" for="remove-signature">Hapus Tanda Tangan</label>
             </div>
         @endif
     </div>
@@ -95,23 +105,54 @@
     </div>
 </div>
 
+<!-- Tambahkan SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    document.getElementById("upload-image").addEventListener("change", function (e) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            document.getElementById("preview-image").src = e.target.result;
-        };
-        reader.readAsDataURL(this.files[0]);
-    });
+document.addEventListener('DOMContentLoaded', function () {
+    const MAX_SIZE_MB = 10;
+    const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
 
-    document.getElementById("upload-images").addEventListener("change", function (e) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            document.getElementById("preview-images").src = e.target.result;
-        };
-        reader.readAsDataURL(this.files[0]);
-    });
+    function handleImageChange(inputId, previewId) {
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
+
+        input.addEventListener('change', function (event) {
+            const file = event.target.files[0];
+
+            if (!file) {
+                return;
+            }
+
+            if (file.size > MAX_SIZE_BYTES) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Ukuran File Terlalu Besar',
+                    text: 'Maksimum ukuran file adalah 10MB.',
+                    confirmButtonColor: '#d33'
+                });
+
+                // Reset input
+                input.value = "";
+
+                // Sembunyikan gambar sepenuhnya
+                preview.style.display = "none";
+                preview.src = DEFAULT_IMAGE; // kosongkan src
+                preview.removeAttribute("src"); // hapus src agar browser tidak tampilkan apapun
+                return;
+            }
+
+            // Jika file valid, tampilkan preview
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                preview.style.display = "block"; // pastikan muncul
+                preview.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    handleImageChange('upload-image', 'preview-image');
+    handleImageChange('upload-signature', 'preview-signature');
 });
 </script>

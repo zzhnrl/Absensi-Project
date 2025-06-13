@@ -13,7 +13,7 @@
             <div class='card-header'>
                 @if ($breadcrumb) {!! $breadcrumb !!} @endif
             </div>
-            <form action="{{route('user.store')}}" method="post" enctype="multipart/form-data">
+            <form id="user-form" action="{{route('user.store')}}" method="post" enctype="multipart/form-data">
                 <div class="card-body">
                     @method('POST')
                     @csrf

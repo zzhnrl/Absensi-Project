@@ -1,7 +1,7 @@
 <div class="row p-2">
     <div class="col-12 col-md-4">
         <label for="upload-image">Foto Bukti</label>
-        <input type="file" id="upload-image" name='imagess' class="form-control @error('image') is-invalid @enderror" />
+        <input type="file" id="upload-image" name='imagess' class="form-control @error('image') is-invalid @enderror" required/>
         @error('image')<span class="text-danger">{{$message}}</span> @enderror
         <img id="preview-image" src="{{ (isset($user) and isset($user->photo)) ? $user->photo->url : asset('img/no_picture.png') }}" alt="your image" width="100%" />
         <small class="form-text text-muted">*Maks 10 Mb dan File wajib PNG atau JPG</small> <!-- ini tambahan teksnya -->
@@ -36,3 +36,33 @@
         <input type="hidden" name="user_information" value="{{$user_information->uuid ?? null}}">
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+document.getElementById('upload-image').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+
+    if (file) {
+        const maxSizeInMB = 10;
+        const maxSizeInBytes = maxSizeInMB * 1024 * 1024;
+
+        if (file.size > maxSizeInBytes) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Ukuran File Terlalu Besar',
+                text: 'Maksimum ukuran file adalah 10MB.',
+                confirmButtonColor: '#d33'
+            });
+            event.target.value = ""; // Reset input file
+            document.getElementById('preview-image').src = "{{ asset('img/no_picture.png') }}";
+        } else {
+            // Tampilkan preview gambar jika valid
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('preview-image').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+});
+</script>

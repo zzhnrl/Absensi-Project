@@ -95,6 +95,7 @@
         name="bukti_foto_dikantor" 
         accept="image/*" 
         class="form-control @error('bukti_foto_dikantor') is-invalid @enderror"
+        required
       >
       <small class="form-text text-muted">*Maks 10 Mb dan File wajib PNG atau JPG</small> <!-- ini tambahan teksnya -->
       @error('bukti_foto_dikantor')
@@ -149,3 +150,33 @@ function updateTime() {
     document.getElementById("status-absensi").value = status;
 }
 </script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const MAX_SIZE_MB = 10;
+    const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
+
+    const buktiFotoInput = document.querySelector('input[name="bukti_foto_dikantor"]');
+
+    if (buktiFotoInput) {
+        buktiFotoInput.addEventListener('change', function (event) {
+            const file = event.target.files[0];
+
+            if (file && file.size > MAX_SIZE_BYTES) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Ukuran File Terlalu Besar',
+                    text: 'Maksimum ukuran file adalah 10MB.',
+                    confirmButtonColor: '#d33'
+                });
+
+                // Reset input agar file tidak dikirim
+                event.target.value = "";
+            }
+        });
+    }
+});
+</script>
+
