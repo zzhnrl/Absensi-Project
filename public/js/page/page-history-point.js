@@ -18,12 +18,15 @@ $(function () {
     tableInstance = datatable.DataTable({
         processing: true,
         serverSide: true,
+        ordering: false,
+
+
         ajax: getUrlWithParams(),
         columns: [
-            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-            { data: 'perubahan_point', name: 'perubahan_point' },
-            { data: 'jumlah_point', name: 'jumlah_point' },
-            { data: 'tanggal', name: 'tanggal' }
+            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false,  },
+            { data: 'perubahan_point', name: 'perubahan_point', orderable: false },
+            { data: 'jumlah_point', name: 'jumlah_point', orderable: false },
+            { data: 'tanggal', name: 'tanggal', orderable: false }
         ]
     });
 

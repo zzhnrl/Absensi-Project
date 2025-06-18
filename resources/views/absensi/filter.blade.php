@@ -16,9 +16,10 @@
                     id="absensi-date-filter" 
                     value="{{ old('date_range', request('date_range', $todayWIB . ' to ' . $todayWIB)) }}"
                     autocomplete="off"
-                >
+                />
             </div>
         </div>
+
         <div class="col-12 col-md-3">
             <label>Karyawan</label>
             <select class="form-control form-select" name="karyawan_filter" id="karyawan-filter">
@@ -30,15 +31,13 @@
                 @endforeach
             </select>
         </div>
+
         <div class="col-12 col-md-3">
             <label>Kategori Absensi</label>
             <select class="form-control form-select" name="kategori_filter" id="kategori-absensi-filter">
                 <option value="">-- Semua Data --</option>
                 {!! each_option($kategori_absensis, 'name', request('kategori_filter')) !!}
             </select>
-        </div>
-        <div class="col-12 col-md-3 mb-3 d-flex align-items-end">
-            <button type="submit" class="btn btn-primary">Filter</button>
         </div>
     </div>
 </form>

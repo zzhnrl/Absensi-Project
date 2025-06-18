@@ -19,6 +19,8 @@ $(document).ready(function() {
         datatable.DataTable({
             processing: true,
             serverSide: true,
+            ordering: false,
+
             ajax: {
                 url: '/rekap_izin_sakit/grid?' + query,
                 type: 'GET',
@@ -28,10 +30,10 @@ $(document).ready(function() {
                 }
             },
             columns: [
-                { data: 'bulan', title: 'Bulan' },
-                { data: 'tahun', title: 'Tahun' },
-                { data: 'nama_karyawan', title: 'Nama Karyawan' },
-                { data: 'jumlah_izin_sakit', title: 'Jumlah Izin Sakit' }
+                { data: 'bulan', title: 'Bulan', orderable: false },
+                { data: 'tahun', title: 'Tahun', orderable: false },
+                { data: 'nama_karyawan', title: 'Nama Karyawan', orderable: false },
+                { data: 'jumlah_izin_sakit', title: 'Jumlah Izin Sakit', orderable: false }
             ],
             lengthChange: false,
             pageLength: 10,

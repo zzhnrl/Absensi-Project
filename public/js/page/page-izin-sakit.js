@@ -28,7 +28,7 @@ $(document).ready(function () {
                 }
             },
             columns: [
-                { data: 'tanggal', title: 'Tanggal' },
+                { data: 'tanggal', title: 'Tanggal', orderable: false },
                 { 
                     data: 'pbukti', 
                     title: 'Foto Bukti',
@@ -40,19 +40,19 @@ $(document).ready(function () {
                     searchable: false,
                     width: '15%'
                 },
-                { data: 'nama_karyawan', title: 'Nama Karyawan' },
-                { data: 'keterangan', title: 'Keterangan' },
+                { data: 'nama_karyawan', title: 'Nama Karyawan', orderable: false },
+                { data: 'keterangan', title: 'Keterangan', orderable: false },
                 { 
                     title: "Created At",
                     data: 'created_at',
-                    defaultContent: '-',
+                    orderable: false,
                     render: function (data) {
                         if (!data) return '-';
-            
+
                         if (!isNaN(data) && String(data).length <= 11) {
                             return moment.unix(data).format("DD/MM/YYYY HH:mm:ss");
                         }
-            
+
                         const parsed = moment(data, 'YYYY-MM-DD HH:mm:ss', true);
                         return parsed.isValid() ? parsed.format("DD/MM/YYYY HH:mm:ss") : '-';
                     }
@@ -66,6 +66,7 @@ $(document).ready(function () {
                     width: '10%'
                 }
             ],
+            ordering: false, // Nonaktifkan sorting global (juga hilangkan panah sort)
             language: {
                 emptyTable: "Data tidak ditemukan"
             },

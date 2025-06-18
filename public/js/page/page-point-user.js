@@ -25,13 +25,13 @@ $(function () {
                 }
             },
             columns: [
-                { title: "Bulan", data: 'bulan' },
-                { title: "Tahun", data: 'tahun' },
-                { title: "Nama Karyawan", data: 'nama_karyawan' },
-                { title: "Jumlah Point", data: 'jumlah_point' },
-                { title: "Point Per Tahun", data: 'jumlah_point_per_tahun' }
+                { title: "Bulan", data: 'bulan', orderable: false },
+                { title: "Tahun", data: 'tahun', orderable: false },
+                { title: "Nama Karyawan", data: 'nama_karyawan', orderable: false },
+                { title: "Jumlah Point", data: 'jumlah_point', orderable: false },
+                { title: "Point Per Tahun", data: 'jumlah_point_per_tahun', orderable: false }
             ],
-            order: [[1, 'desc']], // contoh sorting by tahun desc
+            ordering: false, // Menonaktifkan sorting global
             lengthMenu: [10, 25, 50],
             pageLength: 10,
         });
@@ -56,6 +56,4 @@ $(function () {
     group_filter.on('change', function () {
         tableInstance.ajax.reload();
     });
-
-    // Optional: handle delete if needed with datatableHandleDelete or custom code
 });

@@ -84,5 +84,7 @@ export function datatableHandleDelete ({html,url}) {
             }
         })
     });
+
+    
 }
 

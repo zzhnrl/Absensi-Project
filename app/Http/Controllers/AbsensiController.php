@@ -352,21 +352,25 @@ $history = HistoryPointUser::create([
     public function grid(GetAbsensiRequest $request)
     {
         if (have_permission('absensi_view')) {
-            $approved_role_all = [1,2];
+            $approved_role_all = [1, 2];
             $user_ids = in_array(auth()->user()->userRole->role_id, $approved_role_all)
-            ? User::pluck('id')->toArray()
-            : [auth()->user()->id];
-
+                ? User::pluck('id')->toArray()
+                : [auth()->user()->id];
+    
             $request->merge([
                 'per_page' => $request->length,
                 'page' => $request->start / $request->length + 1,
                 'with_pagination' => true,
                 'search_param' => $request->search['value'],
-                'user_id_in' => $user_ids
+                'user_id_in' => $user_ids,
+                // ✅ Tambahkan filter yang dikirim dari frontend
+                'kategori_filter' => $request->kategori_filter,
+                'karyawan_filter' => $request->karyawan_filter,
+                'date_range' => $request->date_range,
             ]);
-            
+    
             $absensi = app('GetAbsensiService')->execute($request->all());
-
+    
             return datatables($absensi['data'])->skipPaging()
                 ->with([
                     "recordsTotal"    => $absensi['pagination']['total_data'],
@@ -376,23 +380,26 @@ $history = HistoryPointUser::create([
                 ->addColumn('action', function ($row) {
                     if (!empty($row->id)) {
                         $action = [];
-                        (have_permission('absensi_delete')) ? array_push($action, "<button value='$row->uuid' class='delete dropdown-item font-action' >Delete</button>") : null;
+                        if (have_permission('absensi_delete')) {
+                            $action[] = "<button value='$row->uuid' class='delete dropdown-item font-action'>Delete</button>";
+                        }
                         return generate_action_button($action);
                     }
+                    return '';
                 })
-                            // Kolom Bukti Foto
-                            ->addColumn('bukti_foto', function($row) {
-                                if ($row->bukti_foto_dikantor) {
-                                    return "<img src=\"{$row->bukti_foto_url}\" 
-                                                 style=\"max-width:50px;max-height:50px;border-radius:4px;\" 
-                                                 alt=\"Bukti Foto\">";
-                                }
-                                return '-';
-                            })
-                            ->rawColumns(['bukti_foto','action'])
-                            
+                ->addColumn('bukti_foto', function ($row) {
+                    if ($row->bukti_foto_dikantor) {
+                        return "<img src=\"{$row->bukti_foto_url}\" 
+                                     style=\"max-width:50px;max-height:50px;border-radius:4px;\" 
+                                     alt=\"Bukti Foto\">";
+                    }
+                    return '-';
+                })
+                ->rawColumns(['bukti_foto', 'action'])
                 ->toJson();
         }
+    
         return view('errors.403');
     }
+    
 }

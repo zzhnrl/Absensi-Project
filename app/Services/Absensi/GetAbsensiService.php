@@ -14,11 +14,20 @@ class GetAbsensiService extends DefaultService implements ServiceInterface
 {
     public function process($dto)
     {
-        $dto['per_page'] = $dto['per_page'] ?? 10;
-        $dto['page'] = $dto['page'] ?? 1;
-        $dto['sort_by'] = $dto['sort_by'] ?? 'updated_at';
-        $dto['sort_type'] = $dto['sort_type'] ?? 'desc';
-    
+    // Mapping filter dari frontend
+    if (isset($dto['karyawan_filter'])) {
+        $dto['user_uuid'] = $dto['karyawan_filter'];
+    }
+
+    if (isset($dto['kategori_filter'])) {
+        $dto['kategori_absensi_uuid'] = $dto['kategori_filter'];
+    }
+
+    $dto['per_page'] = $dto['per_page'] ?? 10;
+    $dto['page'] = $dto['page'] ?? 1;
+    $dto['sort_by'] = $dto['sort_by'] ?? 'updated_at';
+    $dto['sort_type'] = $dto['sort_type'] ?? 'desc';
+
         $model = Absensi::query();
         $model->whereNull('deleted_at');
     
