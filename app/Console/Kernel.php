@@ -19,6 +19,7 @@ class Kernel extends ConsoleKernel
         
         // Check absent employees daily at 5 PM
         $schedule->command('attendance:check-absent-employees')
+            ->timezone('Asia/Jakarta')
             ->dailyAt('17:01')
             ->appendOutputTo(storage_path('logs/attendance-check.log'));
     }

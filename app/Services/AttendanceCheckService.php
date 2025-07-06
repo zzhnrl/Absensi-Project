@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\Absensi;
 use App\Models\IzinSakit;
 use App\Models\Cuti;
+use App\Models\KategoriAbsensi;
 use App\Models\StatusCuti;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -14,7 +15,7 @@ use Illuminate\Support\Collection;
 class AttendanceCheckService
 {
     /**
-     * Get karyawan employees who haven't checked in by a specific time
+     * Get karyawan and manajer employees who haven't checked in by a specific time
      * and don't have approved leave (izin sakit or cuti)
      *
      * @param string|null $date Date in Y-m-d format, defaults to today
@@ -24,15 +25,26 @@ class AttendanceCheckService
     {
         $date = $date ?? Carbon::now()->format('Y-m-d');
         
-        // Get karyawan role
-        $karyawanRole = Role::where('code', 'R03')->first();
+        // Check if it's weekend (Saturday = 6, Sunday = 0)
+        $dayOfWeek = Carbon::parse($date)->dayOfWeek;
+        if ($dayOfWeek == 0 || $dayOfWeek == 6) {
+            return collect(); // Return empty collection for weekends
+        }
         
-        if (!$karyawanRole) {
+        // Get karyawan and manajer roles
+        $karyawanRole = Role::where('code', 'R03')->first();
+        $manajerRole = Role::where('code', 'R02')->first();
+        
+        $roleIds = [];
+        if ($karyawanRole) $roleIds[] = $karyawanRole->id;
+        if ($manajerRole) $roleIds[] = $manajerRole->id;
+        
+        if (empty($roleIds)) {
             return collect();
         }
         
-        // Get all active users with karyawan role
-        $karyawanUsers = User::where('role_id', $karyawanRole->id)
+        // Get all active users with karyawan or manajer role
+        $employees = User::whereIn('role_id', $roleIds)
             ->where('is_active', 1)
             ->get();
         
@@ -64,7 +76,7 @@ class AttendanceCheckService
         $approvedLeaveUsers = array_merge($izinSakitUsers, $cutiUsers->toArray());
         
         // Find users who haven't checked in and don't have approved leave
-        $absentUsers = $karyawanUsers->whereNotIn('id', $checkedInUsers)
+        $absentUsers = $employees->whereNotIn('id', $checkedInUsers)
             ->whereNotIn('id', $approvedLeaveUsers);
         
         return $absentUsers;
@@ -80,9 +92,27 @@ class AttendanceCheckService
     {
         $date = $date ?? Carbon::now()->format('Y-m-d');
         
-        $karyawanRole = Role::where('code', 'R03')->first();
+        // Check if it's weekend (Saturday = 6, Sunday = 0)
+        $dayOfWeek = Carbon::parse($date)->dayOfWeek;
+        if ($dayOfWeek == 0 || $dayOfWeek == 6) {
+            return [
+                'total_employees' => 0,
+                'checked_in' => 0,
+                'absent' => 0,
+                'on_leave' => 0,
+                'attendance_rate' => 0,
+                'is_weekend' => true
+            ];
+        }
         
-        if (!$karyawanRole) {
+        $karyawanRole = Role::where('code', 'R03')->first();
+        $manajerRole = Role::where('code', 'R02')->first();
+        
+        $roleIds = [];
+        if ($karyawanRole) $roleIds[] = $karyawanRole->id;
+        if ($manajerRole) $roleIds[] = $manajerRole->id;
+        
+        if (empty($roleIds)) {
             return [
                 'total_employees' => 0,
                 'checked_in' => 0,
@@ -92,13 +122,13 @@ class AttendanceCheckService
             ];
         }
         
-        $totalEmployees = User::where('role_id', $karyawanRole->id)
+        $totalEmployees = User::whereIn('role_id', $roleIds)
             ->where('is_active', 1)
             ->count();
             
         $checkedIn = Absensi::where('tanggal', $date)
-            ->whereHas('user', function($query) use ($karyawanRole) {
-                $query->where('role_id', $karyawanRole->id);
+            ->whereHas('user', function($query) use ($roleIds) {
+                $query->whereIn('role_id', $roleIds);
             })
             ->count();
         
@@ -108,8 +138,8 @@ class AttendanceCheckService
         // Count users with approved izin sakit
         $izinSakitCount = IzinSakit::where('tanggal', $date)
             ->where('is_active', 1)
-            ->whereHas('user', function($query) use ($karyawanRole) {
-                $query->where('role_id', $karyawanRole->id);
+            ->whereHas('user', function($query) use ($roleIds) {
+                $query->whereIn('role_id', $roleIds);
             })
             ->count();
         
@@ -120,8 +150,8 @@ class AttendanceCheckService
                 ->where('is_active', 1)
                 ->where('tanggal_mulai', '<=', $date)
                 ->where('tanggal_akhir', '>=', $date)
-                ->whereHas('user', function($query) use ($karyawanRole) {
-                    $query->where('role_id', $karyawanRole->id);
+                ->whereHas('user', function($query) use ($roleIds) {
+                    $query->whereIn('role_id', $roleIds);
                 })
                 ->count();
         }
@@ -135,7 +165,8 @@ class AttendanceCheckService
             'checked_in' => $checkedIn,
             'absent' => $absent,
             'on_leave' => $onLeave,
-            'attendance_rate' => $attendanceRate
+            'attendance_rate' => $attendanceRate,
+            'is_weekend' => false
         ];
     }
     
@@ -148,6 +179,12 @@ class AttendanceCheckService
     public function createAbsentRecords(?string $date = null): int
     {
         $date = $date ?? Carbon::now()->format('Y-m-d');
+        
+        // Check if it's weekend (Saturday = 6, Sunday = 0)
+        $dayOfWeek = Carbon::parse($date)->dayOfWeek;
+        if ($dayOfWeek == 0 || $dayOfWeek == 6) {
+            return 0; // No records created on weekends
+        }
         
         // Get absent employees
         $absentUsers = $this->getAbsentEmployees($date);
@@ -163,17 +200,19 @@ class AttendanceCheckService
             if (!$existingRecord) {
                 // Get user information
                 $userInfo = $user->userInformation;
-                $userName = $userInfo ? $userInfo->nama_lengkap : 'Unknown';
+                $userName = $userInfo ? $userInfo->nama : 'Unknown';
+                $category = KategoriAbsensi::where('code', 'A1')->first();
                 
                 // Create attendance record with status "Alpha / Tidak Hadir"
                 Absensi::create([
                     'uuid' => \App\Helpers\Generate::uuid(),
                     'user_id' => $user->id,
-                    'kategori_absensi_id' => 1, // Default category
                     'nama_karyawan' => $userName,
-                    'nama_kategori' => 'Alpha / Tidak Hadir',
                     'tanggal' => $date,
                     'keterangan' => 'Tidak hadir tanpa izin',
+                    'status_absen' => 'Alpha / Tidak Hadir',
+                    'kategori_absensi_id' => $category->id,
+                    'nama_kategori' => $category->name,
                     'jumlah_point' => 0,
                     'is_active' => 1,
                     'created_at' => time()
