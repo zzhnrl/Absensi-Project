@@ -37,7 +37,7 @@ class GetListPermissionModule extends DefaultService implements ServiceInterface
                     )->where('permission_id', $row->id)->count();
 
                     $string .=  "<div class='form-check m-2'>";
-                    $string .= "<input class='form-check-input' type='checkbox' id='$row->uuid' " . ($role_have_permission > 0 ? "checked" : "") . "/>";
+                    $string .= "<input class='form-check-input' type='checkbox' id='$row->uuid' " . ($role_have_permission > 0 ? "checked" : "") . " onchange='updateRolePermission(\"$row->uuid\")' />";
                     $string .= "<label class='form-check-label' > $row->permission_name </label>";
                     $string .= "</div>";
                 }

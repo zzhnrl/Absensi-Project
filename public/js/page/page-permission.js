@@ -1,4 +1,26 @@
 import {datatableHandleFetchData,datatableHandleEvent} from "/js/helper/datatable.js"
+
+function updateRolePermission(uuid) {
+    console.log(uuid)
+    const role_uuid = $('#role-uuid').val()
+    $ajaxJsonUpdate({
+        url : '/role/' + role_uuid + '/permission/update-role',
+        data : {
+            'permission_uuid' : uuid,
+        },
+        callback: (res) => {
+            Swal.fire({
+                icon: 'success',
+                title: 'Update Success',
+                text: res.message,
+            })
+        }
+    })
+}
+
+// Make function globally accessible
+window.updateRolePermission = updateRolePermission;
+
 $(function () {
     'use strict';
     //init variable
