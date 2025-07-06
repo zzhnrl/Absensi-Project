@@ -202,7 +202,7 @@ public function store(Request $request)
         $totalMenit  = $now->hour * 60 + $now->minute;
 
         // Definisi rentang dalam menit
-        $hadirStart     = 4 * 60;          // 09:00 → 540
+        $hadirStart     = 9 * 60;          // 09:00 → 540
         $hadirEnd       = 10 * 60;         // 10:00 → 600
         $terlambatStart = $hadirEnd + 1;   // 10:01 → 601
         $terlambatEnd   = 17 * 60;         // 17:00 → 1020
