@@ -143,7 +143,7 @@ function updateKategori(status) {
 
     if (status === "Hadir") {
         kategoriValue = "{{ optional($kategori_absensis->where('name', 'Hadir')->first())->uuid }}";
-    } else if (status === "Terlambat") {0 
+    } else if (status === "Terlambat") {
 
 
       
