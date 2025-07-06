@@ -1,6 +1,6 @@
 
 export function datatableHandleFetchData ({html, url, column,columnDefs=null, searching = true}, withAction = true, withCreated = true) {
-    if (withCreated) column.push({
+    if (withCreated && !column?.find(col => col.data === 'created_at')) column.push({
         title: "Created At",
         data: 'created_at',
         defaultContent: '-',
@@ -18,11 +18,9 @@ export function datatableHandleFetchData ({html, url, column,columnDefs=null, se
         }
     });
 
-      
-      
-    if (withAction) column.push({ width: '10%',title: "Action", data: 'action' })
+    if (withAction && !column?.find(col => col.data === 'action')) column.push({ width: '10%',title: "Action", data: 'action' })
 
-    html.DataTable({
+    const table = html.DataTable({
         destroy: true,
         responsive: true,
         serverSide: true,

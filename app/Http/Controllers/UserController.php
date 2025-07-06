@@ -300,7 +300,7 @@ public function store(Request $request)
     /**
      * Display a listing of the resource in datatable formats.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function grid(GetUserRequest $request)
     {
