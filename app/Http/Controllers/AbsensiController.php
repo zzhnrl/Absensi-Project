@@ -94,6 +94,7 @@ class AbsensiController extends Controller
 
             $hariIni = now()->toDateString(); 
             $sudahAbsensi = Absensi::where('user_id', $user)
+                ->where('deleted_at', null)
                 ->where('tanggal', $hariIni) 
                 ->exists();
 

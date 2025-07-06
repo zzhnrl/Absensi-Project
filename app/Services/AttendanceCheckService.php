@@ -58,7 +58,7 @@ class AttendanceCheckService
         
         // Get users with approved izin sakit on the specified date
         $izinSakitUsers = IzinSakit::where('tanggal', $date)
-            ->where('is_active', 1)
+            ->where('deleted_at', null)
             ->pluck('user_id')
             ->toArray();
         
@@ -66,7 +66,7 @@ class AttendanceCheckService
         $cutiUsers = collect();
         if ($approvedStatus) {
             $cutiUsers = Cuti::where('status_cuti_id', $approvedStatus->id)
-                ->where('is_active', 1)
+                ->where('deleted_at', null)
                 ->where('tanggal_mulai', '<=', $date)
                 ->where('tanggal_akhir', '>=', $date)
                 ->pluck('user_id');
@@ -137,7 +137,7 @@ class AttendanceCheckService
         
         // Count users with approved izin sakit
         $izinSakitCount = IzinSakit::where('tanggal', $date)
-            ->where('is_active', 1)
+            ->where('deleted_at', null)
             ->whereHas('user', function($query) use ($roleIds) {
                 $query->whereIn('role_id', $roleIds);
             })
@@ -147,7 +147,7 @@ class AttendanceCheckService
         $cutiCount = 0;
         if ($approvedStatus) {
             $cutiCount = Cuti::where('status_cuti_id', $approvedStatus->id)
-                ->where('is_active', 1)
+                ->where('deleted_at', null)
                 ->where('tanggal_mulai', '<=', $date)
                 ->where('tanggal_akhir', '>=', $date)
                 ->whereHas('user', function($query) use ($roleIds) {
