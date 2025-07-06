@@ -305,55 +305,56 @@ public function store(Request $request)
     public function grid(GetUserRequest $request)
     {
         if (have_permission('user_view')) {
+            Log::info('Filter role_uuid: ', ['role_uuid' => $request->role_uuid]); // Untuk debugging
+    
             $request->merge([
                 'per_page' => $request->length,
                 'page' => $request->start / $request->length + 1,
                 'with_pagination' => true,
-                'search_param' => $request->search['value']
+                'search_param' => $request->search['value'] ?? null
             ]);
-
+    
             $user = app('GetUserService')->execute($request->all());
-
+    
             return datatables($user['data'])->skipPaging()
                 ->with([
                     "recordsTotal"    => $user['pagination']['total_data'],
                     "recordsFiltered" => $user['pagination']['total_data'],
                 ])
                 ->rawColumns(['action', 'profile_picture', 'signature_file'])
-
                 ->addColumn('profile_picture', function ($row) {
-                    return (isset($row->photo_id)) ?
-                        "<img src='" . $row->photo->generateUrl()->url . "' width='100px' />"
-                        :
-                        "<img src='img/no_picture.png' width='100px' />";
+                    return $row->photo_id
+                        ? "<img src='" . $row->photo->generateUrl()->url . "' width='100px' />"
+                        : "<img src='img/no_picture.png' width='100px' />";
                 })
                 ->addColumn('signature_file', function ($row) {
-                    return (isset($row->userInformation->signature_file_id)) ?
-                        "<img src='" . $row->userInformation->signatureFile->generateUrl()->url . "' width='100px' />"
-                        :
-                        "<img src='img/no_picture.png' width='100px' />";
+                    return isset($row->userInformation->signature_file_id)
+                        ? "<img src='" . $row->userInformation->signatureFile->generateUrl()->url . "' width='100px' />"
+                        : "<img src='img/no_picture.png' width='100px' />";
                 })
                 ->addColumn('action', function ($row) {
                     if (!in_array($row->userRole->role_id, [1])) {
                         $action = [];
-                        (have_permission('user_edit')) ? array_push($action, "<a href='" . route('user.edit', [$row->uuid]) . "' class='edit dropdown-item font-action'>Edit</a>") : null;
-                        (have_permission('user_delete')) ? array_push($action, "<button value='$row->uuid' class='delete dropdown-item font-action' >Delete</button>") : null;
+                        if (have_permission('user_edit')) {
+                            $action[] = "<a href='" . route('user.edit', [$row->uuid]) . "' class='edit dropdown-item font-action'>Edit</a>";
+                        }
+                        if (have_permission('user_delete')) {
+                            $action[] = "<button value='$row->uuid' class='delete dropdown-item font-action'>Delete</button>";
+                        }
                         return generate_action_button($action);
                     }
                 })
-
                 ->addColumn('password', function ($row) {
                     try {
-                        // decrypt string terenkripsi
                         return Crypt::decryptString($row->password);
                     } catch (\Exception $e) {
-                        // kalau gagal decrypt, tampilkan placeholder
                         return '—';
                     }
                 })
-            
                 ->toJson();
         }
+    
         return view('errors.403');
     }
+    
 }

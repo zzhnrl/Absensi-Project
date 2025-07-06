@@ -29,17 +29,26 @@ $(document).ready(function () {
             },
             columns: [
                 { data: 'tanggal', title: 'Tanggal', orderable: false },
-                { 
-                    data: 'pbukti', 
+                {
+                    data: 'pbukti',
                     title: 'Foto Bukti',
                     render: function(data) {
                         if (!data) return '-';
-                        return `<img src="${data}" alt="Bukti" style="max-width: 120px; max-height: 80px; object-fit: contain; border-radius: 4px; box-shadow: 0 0 5px rgba(0,0,0,0.1);" />`;
+                        return `
+                            <img src="${data}" 
+                                 alt="Bukti" 
+                                 class="bukti-thumbnail" 
+                                 style="max-width: 120px; max-height: 80px; cursor: pointer; object-fit: contain; border-radius: 4px; box-shadow: 0 0 5px rgba(0,0,0,0.1);"
+                                 data-toggle="modal" 
+                                 data-target="#modalBukti" 
+                                 data-src="${data}" 
+                            />
+                        `;
                     },
                     orderable: false,
                     searchable: false,
                     width: '15%'
-                },
+                },               
                 { data: 'nama_karyawan', title: 'Nama Karyawan', orderable: false },
                 { data: 'keterangan', title: 'Keterangan', orderable: false },
                 { 
@@ -90,4 +99,10 @@ $(document).ready(function () {
     $('.rekap-izin-sakit-filter').on('change', function() {
         fetchData();
     });
+    // Saat gambar thumbnail diklik, isi modal dengan src gambar
+$(document).on('click', '.bukti-thumbnail', function () {
+    const imgSrc = $(this).data('src');
+    $('#modalBuktiImage').attr('src', imgSrc);
+});
+
 });

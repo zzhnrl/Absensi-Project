@@ -76,6 +76,17 @@
         </div>
     </div>
 </div>
+<!-- Modal untuk menampilkan gambar besar -->
+<div class="modal fade" id="modalBukti" tabindex="-1" role="dialog" aria-labelledby="modalBuktiLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <img id="modalBuktiImage" src="" alt="Foto Bukti" style="max-width: 100%; height: auto;" />
+      </div>
+    </div>
+  </div>
+</div>
+
 @stop
 
 @section('css')

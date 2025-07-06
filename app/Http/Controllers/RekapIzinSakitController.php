@@ -44,31 +44,43 @@ class RekapIzinSakitController extends Controller
      * @return \Illuminate\Http\Response
      */
     
-    public function grid(GetRekapIzinSakitRequest $request)
-    {
-        if (have_permission('rekap_izin_sakit_view')) {
-            $approved_role_all = [1,2];
-            $user_ids = in_array(auth()->user()->userRole->role_id, $approved_role_all)
-            ? User::pluck('id')->toArray()
-            : [auth()->user()->id];
-            
-            $request->merge([
-                'per_page' => $request->length,
-                'page' => $request->start / $request->length + 1,
-                'with_pagination' => true,
-                'search_param' => $request->search['value'],
-                'user_id_in' => $user_ids
-            ]);
-
-            $rekap_izin_sakit = app('GetRekapIzinSakitService')->execute($request->all());
-
-            return datatables($rekap_izin_sakit['data'])->skipPaging()
-                ->with([
-                    "recordsTotal"    => $rekap_izin_sakit['pagination']['total_data'],
-                    "recordsFiltered" => $rekap_izin_sakit['pagination']['total_data'],
-                ])
-                ->toJson();
-        }
-        return view('errors.403');
-    }
-}
+     public function grid(GetRekapIzinSakitRequest $request)
+     {
+         if (have_permission('rekap_izin_sakit_view')) {
+             $approved_role_all = [1,2];
+             $user_ids = in_array(auth()->user()->userRole->role_id, $approved_role_all)
+                 ? User::pluck('id')->toArray()
+                 : [auth()->user()->id];
+     
+             // Konversi user_uuid ke user_id
+             if ($request->filled('user_uuid')) {
+                 $user_id = User::where('uuid', $request->user_uuid)->value('id');
+                 if ($user_id) {
+                     $request->merge(['user_id_in' => [$user_id]]);
+                 } else {
+                     $request->merge(['user_id_in' => [-1]]); // jika tidak ditemukan
+                 }
+             } else {
+                 $request->merge(['user_id_in' => $user_ids]);
+             }
+     
+             $request->merge([
+                 'per_page' => $request->length,
+                 'page' => $request->start / $request->length + 1,
+                 'with_pagination' => true,
+                 'search_param' => $request->search['value'] ?? null
+             ]);
+     
+             $rekap_izin_sakit = app('GetRekapIzinSakitService')->execute($request->all());
+     
+             return datatables($rekap_izin_sakit['data'])->skipPaging()
+                 ->with([
+                     "recordsTotal"    => $rekap_izin_sakit['pagination']['total_data'],
+                     "recordsFiltered" => $rekap_izin_sakit['pagination']['total_data'],
+                 ])
+                 ->toJson();
+         }
+     
+         return view('errors.403');
+     }
+    }     
