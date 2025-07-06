@@ -16,6 +16,11 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // $schedule->command('inspire')->hourly();
+        
+        // Check absent employees daily at 5 PM
+        $schedule->command('attendance:check-absent-employees')
+            ->dailyAt('17:01')
+            ->appendOutputTo(storage_path('logs/attendance-check.log'));
     }
 
     /**
