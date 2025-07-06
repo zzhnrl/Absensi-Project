@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class RekapAbsenController extends Controller
 {
@@ -34,47 +35,44 @@ class RekapAbsenController extends Controller
     /**
      * DataTable AJAX: hitung WFO & WFH berdasarkan nama_kategori
      */
+
     public function data(Request $request)
     {
         $approved_role_all = [1, 2];
-    
-        // Ambil user_ids sesuai role
+
         $user_ids = in_array(auth()->user()->userRole->role_id, $approved_role_all)
             ? User::pluck('id')->toArray()
             : [auth()->user()->id];
-    
-        // Ambil bulan & tahun dari request, fallback ke saat ini
+
         $monthName = $request->input('month') ?: Carbon::now('Asia/Jakarta')->translatedFormat('F');
         $year = $request->input('year') ?: Carbon::now('Asia/Jakarta')->format('Y');
-    
+
         try {
             $monthNumber = Carbon::createFromFormat('F', $monthName)->month;
         } catch (\Exception $e) {
             $monthNumber = Carbon::now('Asia/Jakarta')->month;
         }
-    
-        Log::info('Filter bulan diterima: ' . $monthName . ', angka: ' . $monthNumber . ', tahun: ' . $year);
-        Log::info('User IDs yang difilter: ' . json_encode($user_ids));
-    
-        // Ambil data dari tabel absensis yang sesuai filter
-        $absensis = Absensi::with(['user.userInformation'])
-            ->whereIn('user_id', $user_ids)
-            ->whereMonth('tanggal', $monthNumber)
-            ->whereYear('tanggal', $year)
-            ->get();
-    
-        Log::info('Jumlah data absensi ditemukan: ' . $absensis->count());
-    
-        return DataTables::of($absensis)
-        ->addIndexColumn()
-        ->addColumn('nama_karyawan', fn($r) => optional($r->user->userInformation)->nama ?? '-')
-        ->addColumn('WFO', function($r) {
-            return $r->nama_kategori === 'WFO' ? 1 : 0;
-        })
-        ->addColumn('WFH', function($r) {
-            return $r->nama_kategori === 'WFH' ? 1 : 0;
-        })
-        ->make(true);
-    }    
 
+        // Gunakan join karena kita group by user_id
+        $absensi_rekap = DB::table('absensis')
+            ->select(
+                'absensis.user_id',
+                'user_informations.nama AS nama_karyawan',
+                DB::raw("SUM(CASE WHEN absensis.nama_kategori = 'WFO' THEN 1 ELSE 0 END) AS total_wfo"),
+                DB::raw("SUM(CASE WHEN absensis.nama_kategori = 'WFH' THEN 1 ELSE 0 END) AS total_wfh")
+            )
+            ->join('users', 'users.id', '=', 'absensis.user_id')
+            ->leftJoin('user_informations', 'user_informations.user_id', '=', 'users.id')
+            ->whereIn('absensis.user_id', $user_ids)
+            ->whereMonth('absensis.tanggal', $monthNumber)
+            ->whereYear('absensis.tanggal', $year)
+            ->groupBy('absensis.user_id', 'user_informations.nama')
+            ->get();
+
+        return DataTables::of($absensi_rekap)
+            ->addIndexColumn()
+            ->addColumn('WFO', fn($r) => $r->total_wfo)
+            ->addColumn('WFH', fn($r) => $r->total_wfh)
+            ->make(true);
+    }
 }
