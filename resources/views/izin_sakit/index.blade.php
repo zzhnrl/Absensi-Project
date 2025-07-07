@@ -23,6 +23,7 @@
 
                     // 1) Sudah absen hari ini?
                     $hasAbsensi  = Absensi::where('user_id',   $user->id)
+                                         ->where('deleted_at', null)
                                          ->whereDate('tanggal', $today)
                                          ->exists();
 

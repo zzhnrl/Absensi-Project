@@ -194,6 +194,7 @@ class AttendanceCheckService
         foreach ($absentUsers as $user) {
             // Check if attendance record already exists for this user and date
             $existingRecord = Absensi::where('user_id', $user->id)
+                ->where('deleted_at', null)
                 ->where('tanggal', $date)
                 ->first();
             
