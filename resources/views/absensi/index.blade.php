@@ -34,7 +34,7 @@
                                 ->exists();
 
                     // Jika salah satu true, tombol absensi disable
-                    $disableCreate = ($currentHour >= 17) || $hasSakit || $hasCuti;
+                    $disableCreate = ($currentHour >= 24) || $hasSakit || $hasCuti;
                 @endphp
 
                 @if (have_permission('absensi_create'))

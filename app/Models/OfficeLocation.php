@@ -14,6 +14,8 @@ class OfficeLocation extends Model
     protected $fillable = [
         'address', // Tambahkan kolom ini
         'latitude',
-        'longitude'
+        'longitude',
+        'index'
+
     ];
 }

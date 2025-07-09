@@ -10,6 +10,7 @@ use App\Models\Absensi;
 use App\Models\HistoryPointUser;
 use App\Models\PointUser;
 use App\Models\KategoriAbsensi;
+use App\Models\OfficeLocation;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -83,6 +84,8 @@ class AbsensiController extends Controller
 
             $users = app('GetUserService')->execute([]);
             $user = auth()->id();
+            $offices = OfficeLocation::orderBy('index')->limit(2)->get();
+
 
             if (auth()->user()->id === 1) {
                 return view('absensi.create', [
@@ -97,17 +100,12 @@ class AbsensiController extends Controller
                 ->where('tanggal', $hariIni) 
                 ->exists();
 
-            $office = \App\Models\OfficeLocation::first();
-                    if (!$office) {
-            return redirect()->route("absensi")->with('danger', 'Lokasi kantor belum diatur.');
-        }
-
             if (!$sudahAbsensi) {
                 return view('absensi.create', [
                     'breadcrumb' => breadcrumb($breadcrumb),
                     'users' => $users['data'],
                     'kategori_absensis' => KategoriAbsensi::where('is_active', 1)->get(),
-                    'office' => $office
+                    'offices' => $offices,
                 ]);
             } else {
                 $alert = 'success';
@@ -202,8 +200,8 @@ public function store(Request $request)
         $totalMenit  = $now->hour * 60 + $now->minute;
 
         // Definisi rentang dalam menit
-        $hadirStart     = 9 * 60;          // 09:00 → 540
-        $hadirEnd       = 10 * 60;         // 10:00 → 600
+        $hadirStart     = 8 * 60;          // 08:00 → 480
+        $hadirEnd       = 9 * 60;         // 10:00 → 540
         $terlambatStart = $hadirEnd + 1;   // 10:01 → 601
         $terlambatEnd   = 17 * 60;         // 17:00 → 1020
         $alphaStart     = $terlambatEnd + 1; // 17:01 → 1021

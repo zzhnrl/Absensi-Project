@@ -9,8 +9,8 @@ class OfficeLocationController extends Controller
 {
 public function inputLokasi()
 {
-    $office = \App\Models\OfficeLocation::first();
-    return view('input-lokasi', compact('office'));
+    $offices = OfficeLocation::orderBy('index')->limit(2)->get();
+    return view('input-lokasi', compact('offices'));
 }
 
 public function cekKehadiran()
@@ -32,19 +32,26 @@ public function cekKehadiran()
     public function store(Request $request)
     {
         $request->validate([
-            'address' => 'required|string',
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
+            'address'     => 'required|array|max:2',
+            'address.*'   => 'required|string|max:255',
+            'latitude'    => 'required|array',
+            'latitude.*'  => 'required|numeric',
+            'longitude'   => 'required|array',
+            'longitude.*' => 'required|numeric',
         ]);
 
-        // Simpan atau update lokasi kantor di database
-        OfficeLocation::updateOrCreate([], [
-            'address' => $request->address,
-            'latitude' => $request->latitude,
-            'longitude' => $request->longitude,
-        ]);
+        foreach ($request->address as $i => $address) {
+            OfficeLocation::updateOrCreate(
+                ['index' => $i], // index sebagai pembeda
+                [
+                    'address' => $address,
+                    'latitude' => $request->latitude[$i],
+                    'longitude' => $request->longitude[$i],
+                ]
+            );
+        }
 
-        return redirect()->route('inputLokasi')->with('success', 'Lokasi kantor berhasil diperbarui!');
+        return redirect()->route('inputLokasi')->with('success', 'Maksimal dua lokasi kantor berhasil disimpan!');
     }
 }
 
