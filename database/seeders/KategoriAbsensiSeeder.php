@@ -25,6 +25,12 @@ class KategoriAbsensiSeeder extends Seeder
                 'code' => 'W3',
                 'point' => 6,
                 'description' => 'Work from Office merupakan absensi kehadiran karyawan yang berkerja datang ke kantor.'
+            ],
+            [
+                'name' => 'Alpha',
+                'code' => 'A1',
+                'point' => 0,
+                'description' => 'Alpha merupakan absensi kehadiran karyawan yang tidak hadir tanpa izin.'
             ]
         ];
         foreach ($KategoriAbsensi as $KA) {
