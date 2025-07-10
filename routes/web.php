@@ -330,9 +330,26 @@ Route::get('/cuti/export/excel', function () {
     return Excel::download(new CutiExport, 'data-cuti.xlsx');
 })->name('cuti.export.excel');
 
-Route::get('/absensi/export/excel', function () {
-    return Excel::download(new AbsensiExport, 'absensi.xlsx');
-})->name('absensi.export.excel');
+// Route::get('/absensi/export/excel', function () {
+//     return Excel::download(new AbsensiExport, 'absensi.xlsx');
+// })->name('absensi.export.excel');
+Route::get('/absensi/export/pdf', function () {
+    $absensis = \App\Models\Absensi::whereNull('deleted_at')->get();
+    
+    // Get manager signature if available
+    $manager_signature = null;
+    if (auth()->check() && auth()->user()->userInformation) {
+        $manager_signature = auth()->user()->userInformation->signatureFile->url ?? null;
+    }
+    
+    $pdf = PDF::loadView('pdf.absensi', [
+        'absensis' => $absensis,
+        'manager_signature' => $manager_signature
+    ]);
+    
+    $file_name = "Laporan_Absensi_" . date('Y-m-d_H-i-s');
+    return $pdf->stream($file_name . ".pdf");
+})->name('absensi.export.pdf');
 
 
 Route::get('/user/export', function () {
