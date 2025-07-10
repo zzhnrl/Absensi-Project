@@ -357,13 +357,42 @@ Route::get('/user/export', function () {
 })->name('user.export');
 
 
-Route::get('/rekap-izin-sakit/export', function () {
-    return Excel::download(new RekapIzinSakitExport, 'rekap_izin_sakit.xlsx');
-})->name('rekap_izin_sakit.export');
+// Route::get('/rekap-izin-sakit/export', function () {
+//     return Excel::download(new RekapIzinSakitExport, 'rekap_izin_sakit.xlsx');
+// })->name('rekap_izin_sakit.export');
+Route::get('/rekap-izin-sakit/export/pdf', function () {
+    $izin_sakits = \App\Models\IzinSakit::whereNull('deleted_at')->get();
+    
+    // Get manager signature if available
+    $manager_signature = null;
+    if (auth()->check() && auth()->user()->userInformation) {
+        $manager_signature = auth()->user()->userInformation->signatureFile->url ?? null;
+    }
+    
+    $pdf = PDF::loadView('pdf.rekap_izin_sakit', [
+        'izin_sakits' => $izin_sakits,
+        'manager_signature' => $manager_signature
+    ]);
+    $file_name = "Laporan_Izin_Sakit_" . date('Y-m-d_H-i-s');
+    return $pdf->stream($file_name . ".pdf");
+})->name('rekap-izin-sakit.export.pdf');
 
 Route::get('/rekap-absen/export/excel', function () {
     return Excel::download(new RekapAbsenExport, 'rekap_absen.xlsx');
 })->name('rekap-absen.export.excel');
+
+Route::get('/cuti/export/pdf', function () {
+    $cutis = \App\Models\Cuti::with(['statusCuti', 'approveByUser.userInformation', 'rejectByUser.userInformation'])
+        ->whereNull('deleted_at')
+        ->get();
+
+    $pdf = PDF::loadView('pdf.cuti_report', [
+        'cutis' => $cutis
+    ]);
+    $file_name = "Laporan_Cuti_" . date('Y-m-d_H-i-s');
+    return $pdf->stream($file_name . ".pdf");
+})->name('cuti.export.pdf');
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/history-point', [HistoryPointUserController::class, 'index'])
