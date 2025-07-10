@@ -7,6 +7,7 @@ use App\Exceptions\CustomException;
 use App\Http\Requests\Cuti\StoreCutiRequest;
 use App\Http\Requests\Cuti\GetCutiRequest;
 use App\Http\Requests\Cuti\SetujuiRequest;
+use App\Http\Requests\Cuti\TolakRequest;
 use App\Mail\CutiApprovalNotification;
 use App\Mail\CutiNotification;
 use App\Models\Cuti;
@@ -297,7 +298,7 @@ class CutiController extends Controller
      */
 
 
-public function setujui(Request $request, $cuti_uuid)
+public function setujui(SetujuiRequest $request, $cuti_uuid)
 {
     DB::beginTransaction();
     try {
@@ -407,7 +408,7 @@ Log::info("Total cuti yang dihitung (tanpa Sabtu & Minggu): {$totalCuti}");
 
 
 
-public function tolak(Request $request, $cuti_uuid)
+public function tolak(TolakRequest $request, $cuti_uuid)
 {
     DB::beginTransaction();
     try {
