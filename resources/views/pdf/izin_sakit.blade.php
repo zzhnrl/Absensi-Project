@@ -109,7 +109,7 @@
                     </td>
                     <td class="table-border text-left" style="padding: 6px;">{{ $izin_sakit->keterangan }}</td>
                     <td class="table-border text-center" style="padding: 6px;">
-                        <img src="{{ $izin_sakit->foto_bukti }}" width="100px">
+                        <img src="{{ $izin_sakit->photo?->url ?? '' }}" width="100px">
                     </td>
                 </tr>
             @endforeach

@@ -113,8 +113,8 @@
             btnExportPdf.addEventListener('click', function() {
                 const pdfParams = {
                     date_range: $('#absensi-date-filter').val(),
-                    karyawan_filter: $('#karyawan-filter').val(),
-                    kategori_filter: $('#kategori-absensi-filter').val(),
+                    user_uuid: $('#karyawan-filter').val(),
+                    category_uuid: $('#kategori-absensi-filter').val(),
                 };
                 console.log("🚀 ~ btnExportPdf.addEventListener ~ pdfParams:", pdfParams)
 

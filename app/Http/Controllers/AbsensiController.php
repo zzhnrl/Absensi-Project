@@ -418,8 +418,8 @@ $history = HistoryPointUser::create([
         }
     
         // Filter karyawan
-        if ($request->filled('karyawan_filter')) {
-            $userId = User::where('uuid', $request->karyawan_filter)->value('id');
+        if ($request->filled('user_uuid')) {
+            $userId = User::where('uuid', $request->user_uuid)->value('id');
             if ($userId) {
                 $query->where('user_id', $userId);
             } else {
@@ -429,8 +429,14 @@ $history = HistoryPointUser::create([
         }
     
         // Filter kategori absensi
-        if ($request->filled('kategori_filter')) {
-            $query->where('nama_kategori', $request->kategori_filter);
+        if ($request->filled('category_uuid')) {
+            $categoryId = KategoriAbsensi::where('uuid', $request->category_uuid)->value('id');
+            if ($categoryId) {
+                $query->where('kategori_absensi_id', $categoryId);
+            } else {
+                // UUID tidak ditemukan → kosongkan hasil
+                $query->whereNull('kategori_absensi_id');
+            }
         }
         
         $absensis = $query->latest()->get();
@@ -438,7 +444,7 @@ $history = HistoryPointUser::create([
         // Get manager signature if available
         $manager_signature = null;
         if (auth()->check() && auth()->user()->userInformation) {
-            $manager_signature = auth()->user()->userInformation->signatureFile->url ?? null;
+            $manager_signature = auth()->user()->userInformation->signatureFile?->url ?? null;
         }
         
         $pdf = Pdf::loadView('pdf.absensi', [

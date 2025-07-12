@@ -11,6 +11,7 @@ use App\Models\IzinSakit;
 use App\Models\RekapIzinSakit;
 use App\Models\PointUser;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -264,7 +265,7 @@ foreach ($adminUsers as $admin) {
             ]);
     
             // Build query manual (bisa juga dimasukkan ke service)
-            $query = IzinSakit::query();
+            $query = IzinSakit::whereNull('deleted_at');
     
             // Filter user berdasarkan UUID kalau ada
             if ($user_uuid) {
@@ -339,4 +340,38 @@ foreach ($adminUsers as $admin) {
         }
     }
     
+    public function exportPdf(Request $request)
+    {
+        $izin_sakits = IzinSakit::whereNull('deleted_at');
+
+        if ($request->filled('month')) {
+            $izin_sakits->whereMonth('tanggal', $request->month);
+        }
+
+        if ($request->filled('year')) {
+            $izin_sakits->whereYear('tanggal', $request->year);
+        }
+
+        if ($request->filled('user_uuid')) {
+            $user = User::where('uuid', $request->user_uuid)->first();
+            if ($user) {
+                $izin_sakits->where('user_id', $user->id);
+            } else {
+                $izin_sakits->whereNull('user_id');
+            }
+        }
+    
+        // Get manager signature if available
+        $manager_signature = null;
+        if (auth()->check() && auth()->user()->userInformation) {
+            $manager_signature = auth()->user()->userInformation->signatureFile->url ?? null;
+        }
+        
+        $pdf = Pdf::loadView('pdf.izin_sakit', [
+            'izin_sakits' => $izin_sakits->get(),
+            'manager_signature' => $manager_signature
+        ]);
+        $file_name = "Laporan_Izin_Sakit_" . date('Y-m-d_H-i-s');
+        return $pdf->stream($file_name . ".pdf");
+    }
 }

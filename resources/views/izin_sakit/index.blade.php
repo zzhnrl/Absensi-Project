@@ -54,10 +54,9 @@
 
                     {{-- Tombol “Export Excel” hanya untuk role_id ≠ 3 --}}
                     @if (Auth::user()->role_id != 3)
-                        <a href="{{ route('rekap-izin-sakit.export.pdf') }}"
-                            class="btn btn-success btn-md float-right mr-2 text-white">
+                        <button id="btn-export-pdf" class="btn btn-success btn-md float-right mr-2 text-white">
                             <i class="fas fa-file-pdf"></i> Export PDF
-                        </a>
+                        </button>
                     @endif
                 </div>
 
@@ -128,6 +127,20 @@
                     btnAbsen.onclick = () => false;
                 }
             }
+
+            const btnExportPdf = document.getElementById('btn-export-pdf');
+
+            btnExportPdf.addEventListener('click', function() {
+                const pdfParams = {
+                    month: $('#rekap-izin-sakit-month').val(),
+                    year: $('#rekap-izin-sakit-year').val(),
+                    user_uuid: $('#karyawan-filter').val(),
+                };
+
+                window.open(
+                    `{{ route('rekap-izin-sakit.export.pdf') }}?${new URLSearchParams(pdfParams).toString()}`,
+                    '_blank');
+            });
         });
     </script>
 
