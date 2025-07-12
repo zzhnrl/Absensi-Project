@@ -33,9 +33,9 @@
                             ->whereDate('tanggal_akhir', '>=', $today)
                             ->exists();
 
-                        // Jika salah satu true, tombol absensi disable
-                        $disableCreate = $currentHour >= 24 || $hasSakit || $hasCuti;
-                    @endphp
+                    // Jika salah satu true, tombol absensi disable
+                    $disableCreate = ($currentHour >= 17) || $hasSakit || $hasCuti;
+                @endphp
 
                     @if (have_permission('absensi_create'))
                         <a id="btn-absen" href="{{ route('absensi.create') }}"

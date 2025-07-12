@@ -77,6 +77,21 @@ document.addEventListener("DOMContentLoaded", function() {
     updateTime();
     setInterval(updateTime, 1000);
     checkLocation();
+  // Tambah log saat form disubmit
+  const form = document.querySelector("form");
+  if (form) {
+    form.addEventListener("submit", function (e) {
+      const selectedKategori = $('#kategori-absensi').val();
+      $('#hidden-kategori').val(selectedKategori);
+      console.log("📤 [FINAL SUBMIT] kategori_absensi_uuid:", selectedKategori);
+
+      // validasi jika kosong
+      if (!selectedKategori) {
+        alert("Kategori absensi belum ditentukan.");
+        e.preventDefault(); // batalkan submit
+      }
+    });
+  }
 });
 
 function updateTime() {
@@ -87,7 +102,7 @@ function updateTime() {
     const currentTime = `${hours}:${minutes}:${seconds}`;
     document.getElementById("current-time").value = currentTime;
 
-    console.log(`⏰ Waktu Sekarang: ${currentTime}`);
+    //console.log(`⏰ Waktu Sekarang: ${currentTime}`);
 
     // hitung status berdasarkan WIB
     let statusAbsensi;
@@ -100,13 +115,42 @@ function updateTime() {
     }
 
     document.getElementById("status-absensi").value = statusAbsensi;
-    console.log(`📌 Status Absensi: ${statusAbsensi}`);
+    //console.log(`📌 Status Absensi: ${statusAbsensi}`);
 
     // Tunggu lokasi sebelum update kategori
 }
 
 
+let lokasiSudahDiperiksa = false;
 let watchId;
+
+document.addEventListener("DOMContentLoaded", function () {
+  console.log("📌 Halaman Absensi Dimuat");
+  updateTime();
+  setInterval(updateTime, 1000);
+
+  checkLocation();
+
+  const form = document.querySelector("form");
+  if (form) {
+    form.addEventListener("submit", function (e) {
+      if (!lokasiSudahDiperiksa) {
+        alert("Tunggu hingga lokasi berhasil ditentukan terlebih dahulu.");
+        e.preventDefault();
+        return;
+      }
+
+      const selectedKategori = $('#kategori-absensi').val();
+      $('#hidden-kategori').val(selectedKategori);
+      console.log("📤 [FINAL SUBMIT] kategori_absensi_uuid:", selectedKategori);
+
+      if (!selectedKategori) {
+        alert("Kategori absensi belum ditentukan.");
+        e.preventDefault();
+      }
+    });
+  }
+});
 
 function checkLocation() {
   const selected = document.getElementById("kantor-terpilih");
@@ -123,12 +167,11 @@ function checkLocation() {
     return alert("❌ Geolocation tidak didukung.");
   }
 
-  // Clear watch sebelumnya kalau ada
   if (watchId) {
     navigator.geolocation.clearWatch(watchId);
   }
 
-  watchId = navigator.geolocation.getCurrentPosition(pos => {
+  navigator.geolocation.getCurrentPosition(pos => {
     const userLat = pos.coords.latitude;
     const userLng = pos.coords.longitude;
     const accuracy = pos.coords.accuracy;
@@ -136,17 +179,14 @@ function checkLocation() {
     console.log(`📍 Lokasi: ${userLat}, ${userLng}, Akurasi: ${accuracy} meter`);
 
     const distance = getDistance(userLat, userLng, officeLat, officeLng);
-
     document.getElementById("distanceInfo").value = distance.toFixed(2) + " m";
-    document.getElementById("accuracy-info").innerText = `Akurasi GPS saat ini: ±${accuracy.toFixed(0)} meter`;
-    document.getElementById("distance-text").innerText = `Jarak Anda ke kantor ini: ${distance.toFixed(2)} meter (Akurasi GPS: ${accuracy} m)`;
 
     const uuid = pilihKategori(distance);
     $('#kategori-absensi').val(uuid).trigger('change.select2');
     $('#hidden-kategori').val(uuid);
+    console.log("📥 hidden-kategori diisi dengan:", uuid);
 
-    updateTime();
-
+    lokasiSudahDiperiksa = true;
   }, err => {
     console.error(err);
     alert("Gagal mendapatkan lokasi: " + err.message);
@@ -156,6 +196,7 @@ function checkLocation() {
     maximumAge: 0
   });
 }
+
 
 function resetLocationInfo() {
   document.getElementById("distanceInfo").value = "";
@@ -226,6 +267,7 @@ function updateKategori(status) {
     if (kategoriValue) {
         document.getElementById("kategori-absensi").value = kategoriValue;
         document.getElementById("hidden-kategori").value = kategoriValue;
+        console.log("📥 hidden-kategori diisi lewat updateKategori:", kategoriValue);
     } else {
         console.warn("⚠️ UUID Kategori Absensi Tidak Ditemukan!");
     }

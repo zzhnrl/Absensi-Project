@@ -210,7 +210,7 @@ public function store(Request $request)
 
         // Hitung status berdasarkan waktu WIB
         if ($totalMenit >= $hadirStart && $totalMenit <= $hadirEnd) {
-            $status_absen = "Hadir";
+            $status_absen = "Hadir";    
         } elseif ($totalMenit >= $terlambatStart && $totalMenit <= $terlambatEnd) {
             $status_absen = "Terlambat";
         } elseif ($totalMenit >= $alphaStart && $totalMenit < 24 * 60) {
