@@ -6,6 +6,7 @@ use App\Exports\CutiExport;
 use App\Exports\HistoryPointExport;
 use App\Exports\RekapIzinSakitExport;
 use App\Exports\UserExport;
+use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\CutiController;
 use App\Http\Controllers\HistoryPointUserController;
 use App\Http\Controllers\OfficeLocationController;
@@ -16,6 +17,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 /*
 |--------------------------------------------------------------------------
@@ -333,23 +336,7 @@ Route::get('/cuti/export/excel', function () {
 // Route::get('/absensi/export/excel', function () {
 //     return Excel::download(new AbsensiExport, 'absensi.xlsx');
 // })->name('absensi.export.excel');
-Route::get('/absensi/export/pdf', function () {
-    $absensis = \App\Models\Absensi::whereNull('deleted_at')->get();
-    
-    // Get manager signature if available
-    $manager_signature = null;
-    if (auth()->check() && auth()->user()->userInformation) {
-        $manager_signature = auth()->user()->userInformation->signatureFile->url ?? null;
-    }
-    
-    $pdf = PDF::loadView('pdf.absensi', [
-        'absensis' => $absensis,
-        'manager_signature' => $manager_signature
-    ]);
-    
-    $file_name = "Laporan_Absensi_" . date('Y-m-d_H-i-s');
-    return $pdf->stream($file_name . ".pdf");
-})->name('absensi.export.pdf');
+Route::get('/absensi/export/pdf', [AbsensiController::class, 'exportPdf'])->name('absensi.export.pdf');
 
 
 Route::get('/user/export', function () {

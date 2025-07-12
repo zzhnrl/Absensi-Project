@@ -48,9 +48,9 @@
 
                     {{-- Tombol "Export PDF" hanya untuk role_id ≠ 3 --}}
                     @if (Auth::user()->role_id != 3)
-                        <a href="{{ route('absensi.export.pdf') }}" class="btn btn-success btn-md float-right mr-2 text-white">
+                        <button id="btn-export-pdf" class="btn btn-success btn-md float-right mr-2 text-white">
                             <i class="fas fa-file-pdf"></i> Export PDF
-                        </a>
+                        </button>
                     @endif
                 </div>
                 <br>
@@ -108,7 +108,20 @@
                 }
             }
 
-            console.log('Tanggal hari ini:', isoToday);
+            const btnExportPdf = document.getElementById('btn-export-pdf');
+
+            btnExportPdf.addEventListener('click', function() {
+                const pdfParams = {
+                    date_range: $('#absensi-date-filter').val(),
+                    karyawan_filter: $('#karyawan-filter').val(),
+                    kategori_filter: $('#kategori-absensi-filter').val(),
+                };
+                console.log("🚀 ~ btnExportPdf.addEventListener ~ pdfParams:", pdfParams)
+
+                window.open(
+                    `{{ route('absensi.export.pdf') }}?${new URLSearchParams(pdfParams).toString()}`,
+                    '_blank');
+            });
         });
     </script>
 

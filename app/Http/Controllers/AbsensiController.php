@@ -12,6 +12,7 @@ use App\Models\PointUser;
 use App\Models\KategoriAbsensi;
 use App\Models\OfficeLocation;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -399,6 +400,54 @@ $history = HistoryPointUser::create([
         }
     
         return view('errors.403');
+    }
+
+    public function exportPdf (Request $request) {
+        $query = Absensi::whereNull('deleted_at');
+        
+        // Filter tanggal
+        if ($request->filled('date_range')) {
+            $range = explode(' to ', $request->date_range);
+            if (count($range) === 2) {
+                $start = Carbon::parse($range[0])->startOfDay();
+                $end = Carbon::parse($range[1])->endOfDay();
+                $query->whereBetween('tanggal', [$start, $end]);
+            } else if (count($range) === 1) {
+                $query->where('tanggal', $range[0]);
+            }
+        }
+    
+        // Filter karyawan
+        if ($request->filled('karyawan_filter')) {
+            $userId = User::where('uuid', $request->karyawan_filter)->value('id');
+            if ($userId) {
+                $query->where('user_id', $userId);
+            } else {
+                // UUID tidak ditemukan → kosongkan hasil
+                $query->whereNull('user_id');
+            }
+        }
+    
+        // Filter kategori absensi
+        if ($request->filled('kategori_filter')) {
+            $query->where('nama_kategori', $request->kategori_filter);
+        }
+        
+        $absensis = $query->latest()->get();
+        
+        // Get manager signature if available
+        $manager_signature = null;
+        if (auth()->check() && auth()->user()->userInformation) {
+            $manager_signature = auth()->user()->userInformation->signatureFile->url ?? null;
+        }
+        
+        $pdf = Pdf::loadView('pdf.absensi', [
+            'absensis' => $absensis,
+            'manager_signature' => $manager_signature
+        ]);
+        
+        $file_name = "Laporan_Absensi_" . date('Y-m-d_H-i-s');
+        return $pdf->stream($file_name . ".pdf");
     }
     
 }

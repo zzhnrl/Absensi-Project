@@ -153,13 +153,13 @@
                     <font color="#000000">Kategori</font>
                 </th>
                 <th class="table-border text-center" style="padding: 8px;">
+                    <font color="#000000">Status Absensi</font>
+                </th>
+                <th class="table-border text-center" style="padding: 8px;">
                     <font color="#000000">Tanggal</font>
                 </th>
                 <th class="table-border text-center" style="padding: 8px;">
                     <font color="#000000">Jam Masuk</font>
-                </th>
-                <th class="table-border text-center" style="padding: 8px;">
-                    <font color="#000000">Jam Keluar</font>
                 </th>
                 <th class="table-border text-center" style="padding: 8px;">
                     <font color="#000000">Keterangan</font>
@@ -182,15 +182,15 @@
                         <font color="#000000">{{ $absensi->nama_kategori }}</font>
                     </td>
                     <td class="table-border text-center" style="padding: 6px;">
+                        <font color="#000000">{{ $absensi->status_absen }}</font>
+                    </td>
+                    <td class="table-border text-center" style="padding: 6px;">
                         <font color="#000000">
                             {{ \Carbon\Carbon::parse($absensi->tanggal)->locale('id')->translatedFormat('d/m/Y') }}
                         </font>
                     </td>
                     <td class="table-border text-center" style="padding: 6px;">
                         <font color="#000000">{{ $absensi->jam_masuk ?? '-' }}</font>
-                    </td>
-                    <td class="table-border text-center" style="padding: 6px;">
-                        <font color="#000000">{{ $absensi->jam_keluar ?? '-' }}</font>
                     </td>
                     <td class="table-border text-left" style="padding: 6px;">
                         <font color="#000000">{{ $absensi->keterangan ?? '-' }}</font>
