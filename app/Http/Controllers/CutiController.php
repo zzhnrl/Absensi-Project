@@ -613,4 +613,47 @@ public function tolak(TolakRequest $request, $cuti_uuid)
         }
         return view('errors.403');
     }
+
+    public function exportPdf(Request $request)
+    {
+        $cutis = Cuti::with(['statusCuti', 'approveByUser.userInformation', 'rejectByUser.userInformation'])
+        ->whereNull('deleted_at');
+
+        // Filter tanggal
+        if ($request->filled('date_range')) {
+            $range = explode(' to ', $request->date_range);
+
+            if (count($range) === 2) {
+                $start = Carbon::parse($range[0])->startOfDay();
+                $end = Carbon::parse($range[1])->endOfDay();
+                $cutis->whereBetween('tanggal_mulai', [$start, $end]);
+            } else {
+                $cutis->whereDate('tanggal_mulai', $request->date_range);
+            }
+        }
+
+        if ($request->filled('user_uuid')) {
+            $user = User::where('uuid', $request->user_uuid)->first();
+            if ($user) {
+                $cutis->where('user_id', $user->id);
+            }
+        }
+
+        if ($request->filled('status_cuti_uuid')) {
+            $statusCuti = StatusCuti::where('uuid', $request->status_cuti_uuid)->first();
+            if ($statusCuti) {
+                $cutis->where('status_cuti_id', $statusCuti->id);
+            }
+        }
+
+        if ($request->filled('search_param')) {
+            $cutis->where('nama', 'ILIKE', '%' . $request->search_param . '%');
+        }
+
+        $pdf = PDF::loadView('pdf.cuti_report', [
+            'cutis' => $cutis->get()
+        ]);
+        $file_name = "Laporan_Cuti_" . date('Y-m-d_H-i-s');
+        return $pdf->stream($file_name . ".pdf");
+    }
 }

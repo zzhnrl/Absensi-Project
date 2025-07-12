@@ -354,17 +354,7 @@ Route::get('/rekap-absen/export/excel', function () {
     return Excel::download(new RekapAbsenExport, 'rekap_absen.xlsx');
 })->name('rekap-absen.export.excel');
 
-Route::get('/cuti/export/pdf', function () {
-    $cutis = \App\Models\Cuti::with(['statusCuti', 'approveByUser.userInformation', 'rejectByUser.userInformation'])
-        ->whereNull('deleted_at')
-        ->get();
-
-    $pdf = PDF::loadView('pdf.cuti_report', [
-        'cutis' => $cutis
-    ]);
-    $file_name = "Laporan_Cuti_" . date('Y-m-d_H-i-s');
-    return $pdf->stream($file_name . ".pdf");
-})->name('cuti.export.pdf');
+Route::get('/cuti/export/pdf', [CutiController::class, 'exportPdf'])->name('cuti.export.pdf');
 
 
 Route::middleware('auth')->group(function () {

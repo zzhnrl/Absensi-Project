@@ -53,9 +53,9 @@
                     @endif
                     {{-- Tombol “Export Excel” hanya untuk role_id ≠ 3 --}}
                     @if (Auth::user()->role_id != 3)
-                        <a href="{{ route('cuti.export.pdf') }}" class="btn btn-success btn-md float-right mr-2 text-white">
+                        <button id="btn-export-pdf" class="btn btn-success btn-md float-right mr-2 text-white">
                             <i class="fas fa-file-pdf"></i> Export PDF
-                        </a>
+                        </button>
                     @endif
                 </div>
                 <br>
@@ -84,4 +84,21 @@
 
 @section('js')
     <script src="{{ asset('js/page/page-cuti.js') }}" type="module"></script>
+
+    <script>
+        const btnExportPdf = document.getElementById('btn-export-pdf');
+
+        btnExportPdf.addEventListener('click', function() {
+            const pdfParams = {
+                date_range: $('#cuti-date-filter').val(),
+                user_uuid: $('#karyawan-filter').val(),
+                status_cuti_uuid: $('#status-filter').val(),
+                search_param: $('#datatable_filter input').val(),
+            };
+
+            window.open(
+                `{{ route('cuti.export.pdf') }}?${new URLSearchParams(pdfParams).toString()}`,
+                '_blank');
+        });
+    </script>
 @stop

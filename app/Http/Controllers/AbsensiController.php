@@ -413,7 +413,7 @@ $history = HistoryPointUser::create([
                 $end = Carbon::parse($range[1])->endOfDay();
                 $query->whereBetween('tanggal', [$start, $end]);
             } else if (count($range) === 1) {
-                $query->where('tanggal', $range[0]);
+                $query->whereDate('tanggal', $request->date_range);
             }
         }
     
@@ -437,6 +437,10 @@ $history = HistoryPointUser::create([
                 // UUID tidak ditemukan → kosongkan hasil
                 $query->whereNull('kategori_absensi_id');
             }
+        }
+
+        if ($request->filled('search_param')) {
+            $query->where('nama_karyawan', 'ILIKE', '%' . $request->search_param . '%');
         }
         
         $absensis = $query->latest()->get();

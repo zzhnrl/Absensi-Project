@@ -135,6 +135,7 @@
                     month: $('#rekap-izin-sakit-month').val(),
                     year: $('#rekap-izin-sakit-year').val(),
                     user_uuid: $('#karyawan-filter').val(),
+                    search_param: $('#datatable_filter input').val(),
                 };
 
                 window.open(

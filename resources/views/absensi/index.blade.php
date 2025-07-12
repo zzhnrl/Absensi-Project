@@ -115,8 +115,8 @@
                     date_range: $('#absensi-date-filter').val(),
                     user_uuid: $('#karyawan-filter').val(),
                     category_uuid: $('#kategori-absensi-filter').val(),
+                    search_param: $('#datatable_filter input').val(),
                 };
-                console.log("🚀 ~ btnExportPdf.addEventListener ~ pdfParams:", pdfParams)
 
                 window.open(
                     `{{ route('absensi.export.pdf') }}?${new URLSearchParams(pdfParams).toString()}`,

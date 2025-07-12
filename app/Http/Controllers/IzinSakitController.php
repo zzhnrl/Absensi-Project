@@ -360,11 +360,15 @@ foreach ($adminUsers as $admin) {
                 $izin_sakits->whereNull('user_id');
             }
         }
+
+        if ($request->filled('search_param')) {
+            $izin_sakits->where('nama_karyawan', 'ILIKE', '%' . $request->search_param . '%');
+        }
     
         // Get manager signature if available
         $manager_signature = null;
         if (auth()->check() && auth()->user()->userInformation) {
-            $manager_signature = auth()->user()->userInformation->signatureFile->url ?? null;
+            $manager_signature = auth()->user()->userInformation->signatureFile?->url ?? null;
         }
         
         $pdf = Pdf::loadView('pdf.izin_sakit', [
