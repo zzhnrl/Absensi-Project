@@ -338,6 +338,7 @@ Route::get('/cuti/export/excel', function () {
 //     return Excel::download(new AbsensiExport, 'absensi.xlsx');
 // })->name('absensi.export.excel');
 Route::get('/absensi/export/pdf', [AbsensiController::class, 'exportPdf'])->name('absensi.export.pdf');
+Route::get('/rekap-absen/export/pdf', [RekapAbsenController::class, 'exportPdf'])->name('rekap-absen.export.pdf');
 
 
 Route::get('/user/export', function () {
@@ -349,10 +350,6 @@ Route::get('/user/export', function () {
 //     return Excel::download(new RekapIzinSakitExport, 'rekap_izin_sakit.xlsx');
 // })->name('rekap_izin_sakit.export');
 Route::get('/rekap-izin-sakit/export/pdf', [IzinSakitController::class, 'exportPdf'])->name('rekap-izin-sakit.export.pdf');
-
-Route::get('/rekap-absen/export/excel', function () {
-    return Excel::download(new RekapAbsenExport, 'rekap_absen.xlsx');
-})->name('rekap-absen.export.excel');
 
 Route::get('/cuti/export/pdf', [CutiController::class, 'exportPdf'])->name('cuti.export.pdf');
 

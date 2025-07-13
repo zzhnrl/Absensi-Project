@@ -459,5 +459,5 @@ $history = HistoryPointUser::create([
         $file_name = "Laporan_Absensi_" . date('Y-m-d_H-i-s');
         return $pdf->stream($file_name . ".pdf");
     }
-    
+
 }
