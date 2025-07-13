@@ -12,6 +12,7 @@ use App\Http\Controllers\HistoryPointUserController;
 use App\Http\Controllers\IzinSakitController;
 use App\Http\Controllers\OfficeLocationController;
 use App\Http\Controllers\RekapAbsenController;
+use App\Http\Controllers\RekapIzinSakitController;
 use App\Http\Controllers\UserController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
@@ -346,10 +347,8 @@ Route::get('/user/export', function () {
 })->name('user.export');
 
 
-// Route::get('/rekap-izin-sakit/export', function () {
-//     return Excel::download(new RekapIzinSakitExport, 'rekap_izin_sakit.xlsx');
-// })->name('rekap_izin_sakit.export');
-Route::get('/rekap-izin-sakit/export/pdf', [IzinSakitController::class, 'exportPdf'])->name('rekap-izin-sakit.export.pdf');
+Route::get('/rekap-izin-sakit/export/pdf', [RekapIzinSakitController::class, 'exportPdf'])->name('rekap-izin-sakit.export.pdf');
+Route::get('/izin-sakit/export/pdf', [IzinSakitController::class, 'exportPdf'])->name('izin-sakit.export.pdf');
 
 Route::get('/cuti/export/pdf', [CutiController::class, 'exportPdf'])->name('cuti.export.pdf');
 

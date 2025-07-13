@@ -139,7 +139,7 @@
                 };
 
                 window.open(
-                    `{{ route('rekap-izin-sakit.export.pdf') }}?${new URLSearchParams(pdfParams).toString()}`,
+                    `{{ route('izin-sakit.export.pdf') }}?${new URLSearchParams(pdfParams).toString()}`,
                     '_blank');
             });
         });

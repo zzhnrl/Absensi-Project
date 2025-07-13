@@ -30,11 +30,11 @@ class GetRekapIzinSakitService extends DefaultService implements ServiceInterfac
         }
 
         if (isset($dto['month'])) {
-            $model->where('bulan', $dto['month']);
+            $model->whereMonth('tanggal', $dto['month']);
         }
 
         if (isset($dto['year'])) {
-            $model->where('tahun', $dto['year']);
+            $model->whereYear('tanggal', $dto['year']);
         }
 
         if (isset($dto['rekap_izin_sakit_uuid']) and $dto['rekap_izin_sakit_uuid'] != '') {

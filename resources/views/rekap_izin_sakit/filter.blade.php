@@ -2,9 +2,9 @@
     <div class="col-12 col-md-3">
         <label>Bulan</label>
         <select id="rekap-izin-sakit-month" class="form-control rekap-izin-sakit-filter">
-            @foreach (App\Helpers\DateTime::getArrayOfMonths() as $index => $month)
-                <option value="{{ $month }}" @if ($month == now()->locale('id')->translatedFormat('F')) selected @endif>
-                    {{ $month }}
+            @foreach (range(1,12) as $num)
+                <option value="{{ $num }}" @if ($num == now()->month) selected @endif>
+                    {{ \Carbon\Carbon::create()->month($num)->locale('id')->translatedFormat('F') }}
                 </option>
             @endforeach
         </select>                
